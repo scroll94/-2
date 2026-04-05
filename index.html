@@ -20,9 +20,11 @@ body {
 
 .flipped { transform: rotateY(180deg); }
 
-.front, .back { background: #ff2e75; color: #ffffff; transform: rotateY(180deg); }
+/* фикс бага с зеркалом */ .inner { transform: rotateY(0deg); }
 
-.front { background: #ffffff; color: #ff2e75; }
+.front, .back { transform: rotateY(180deg); background: #ff2e75; color: #ffffff; transform: rotateY(180deg); }
+
+.front { transform: rotateY(0deg); background: #ffffff; color: #ff2e75; }
 
 .back { background: #ff4d88; color: white; transform: rotateY(180deg); }
 

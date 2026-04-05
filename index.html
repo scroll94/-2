@@ -2,667 +2,150 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PYTHON SLAYER</title>
-<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<title>Карточки по химии</title>
+
 <style>
-:root {
-  --blood: #c0392b;
-  --fire: #e67e22;
-  --gold: #f1c40f;
-  --dark: #0a0a0a;
-  --darker: #050505;
-  --stone: #1a1a1a;
-  --steel: #2c2c2c;
-  --text: #e8e0d0;
-  --dim: #777;
-  --green: #27ae60;
-  --blue: #2980b9;
-  --purple: #8e44ad;
-}
-* { margin:0; padding:0; box-sizing:border-box; }
 body {
-  background: var(--darker);
-  color: var(--text);
-  font-family: 'Share Tech Mono', monospace;
-  min-height: 100vh;
-  overflow-x: hidden;
-  background-image:
-    radial-gradient(ellipse at 50% 0%, rgba(192,57,43,0.12) 0%, transparent 55%),
-    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px);
-}
-body::after {
-  content:'';
-  position:fixed; inset:0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px);
-  pointer-events:none; z-index:9999;
+    font-family: Arial;
+    background: #111;
+    color: white;
+    text-align: center;
 }
 
-/* ── LAYOUT ── */
-#screen { max-width:920px; margin:0 auto; padding:20px; min-height:100vh; display:flex; flex-direction:column; }
-
-/* ── TITLE ── */
-#title-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; gap:24px; text-align:center; }
-.game-title {
-  font-family:'Black Ops One',cursive;
-  font-size: clamp(52px,10vw,100px);
-  color: var(--gold);
-  text-shadow: 0 0 20px rgba(241,196,15,.8), 0 0 60px rgba(241,196,15,.3), 4px 4px 0 var(--blood), 8px 8px 0 rgba(192,57,43,.4);
-  letter-spacing:8px; line-height:1;
-  animation: titlePulse 2.5s ease-in-out infinite;
+.controls {
+    margin: 20px;
 }
-@keyframes titlePulse {
-  0%,100% { text-shadow: 0 0 20px rgba(241,196,15,.8), 0 0 60px rgba(241,196,15,.3), 4px 4px 0 var(--blood); }
-  50% { text-shadow: 0 0 40px rgba(241,196,15,1), 0 0 100px rgba(241,196,15,.5), 4px 4px 0 var(--blood), 0 0 140px rgba(230,126,34,.2); }
+
+button {
+    padding: 10px 15px;
+    margin: 5px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
 }
-.subtitle { color:var(--blood); font-size:16px; letter-spacing:5px; border:1px solid var(--blood); padding:7px 22px; }
-.dragon-big { font-size:90px; animation:dragonFloat 3s ease-in-out infinite; filter:drop-shadow(0 0 18px rgba(192,57,43,.8)); }
-@keyframes dragonFloat { 0%,100%{transform:translateY(0) scaleX(-1);} 50%{transform:translateY(-14px) scaleX(-1);} }
 
-/* ── DIFFICULTY SELECTOR ── */
-.diff-label { color:var(--dim); font-size:11px; letter-spacing:4px; text-align:center; margin-bottom:8px; }
-.diff-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:100%; max-width:520px; }
-.diff-btn {
-  font-family:'Black Ops One',cursive;
-  font-size:15px; letter-spacing:3px;
-  background:transparent; border:2px solid;
-  padding:16px 10px; cursor:pointer;
-  transition:all .2s; position:relative; overflow:hidden;
-  clip-path: polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
-.diff-btn.easy   { border-color:var(--green); color:var(--green); }
-.diff-btn.medium { border-color:var(--gold);  color:var(--gold);  }
-.diff-btn.hard   { border-color:var(--blood); color:var(--blood); }
-.diff-btn::before { content:''; position:absolute; inset:0; opacity:0; transition:opacity .2s; }
-.diff-btn.easy::before   { background:var(--green); }
-.diff-btn.medium::before { background:var(--gold);  }
-.diff-btn.hard::before   { background:var(--blood); }
-.diff-btn:hover::before { opacity:1; }
-.diff-btn:hover { color:var(--dark); transform:scale(1.04); }
-.diff-btn span { position:relative; z-index:1; }
-.diff-sub { font-size:10px; letter-spacing:1px; font-family:'Share Tech Mono',monospace; display:block; margin-top:4px; }
 
-.fire-row { color:var(--blood); font-size:18px; letter-spacing:3px; animation:firePulse .9s ease-in-out infinite alternate; }
-@keyframes firePulse { from{opacity:.5} to{opacity:1;text-shadow:0 0 16px var(--fire);} }
-
-/* ── BATTLE SCREEN ── */
-#battle-screen { display:none; flex-direction:column; gap:14px; padding:8px 0; }
-.battle-header { font-family:'Black Ops One',cursive; text-align:center; color:var(--gold); font-size:13px; letter-spacing:4px; border-bottom:1px solid var(--steel); padding-bottom:8px; }
-
-/* HP BARS */
-.combatants {
-  display:grid; grid-template-columns:1fr auto 1fr; gap:18px; align-items:center;
-  background:var(--stone); border:1px solid var(--steel); padding:14px 18px; position:relative; overflow:hidden;
+.card {
+    width: 200px;
+    height: 120px;
+    margin: 10px;
+    perspective: 1000px;
 }
-.combatants::before {
-  content:''; position:absolute; inset:0;
-  background: repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.008) 10px,rgba(255,255,255,.008) 11px);
+
+.inner {
+    width: 100%;
+    height: 100%;
+    transition: 0.6s;
+    transform-style: preserve-3d;
+    position: relative;
 }
-.fighter-panel { position:relative; z-index:1; }
-.fighter-name { font-family:'Black Ops One',cursive; font-size:12px; letter-spacing:3px; margin-bottom:5px; }
-.fighter-name.player { color:var(--gold); }
-.fighter-name.dragon { color:var(--blood); text-align:right; }
-.hp-bar-wrap { height:13px; background:#111; border:1px solid #333; overflow:hidden; }
-.hp-bar { height:100%; transition:width .5s ease; }
-.hp-bar.player-hp { background:linear-gradient(90deg,#1a6b3a,var(--green),#2ecc71); box-shadow:0 0 8px rgba(39,174,96,.5); }
-.hp-bar.dragon-hp  { background:linear-gradient(90deg,#7b0000,var(--blood),#e74c3c); box-shadow:0 0 8px rgba(192,57,43,.5); float:right; }
-.hp-text { font-size:10px; color:var(--dim); margin-top:3px; }
-.hp-text.dragon { text-align:right; }
-.vs-badge { font-family:'Black Ops One',cursive; font-size:26px; color:var(--blood); text-shadow:0 0 16px var(--blood); z-index:1; text-align:center; }
-.hearts { font-size:20px; letter-spacing:2px; }
-.heart { display:inline-block; transition:all .3s; }
-.heart.lost { filter:grayscale(1) opacity(.3); animation:heartLost .4s ease; }
-@keyframes heartLost { 0%{transform:scale(1.5);} 100%{transform:scale(1);} }
 
-/* ARENA */
-.arena {
-  background:var(--stone); border:1px solid var(--steel);
-  height:150px; position:relative; overflow:hidden;
-  display:flex; align-items:flex-end; justify-content:space-between; padding:0 40px 18px;
+.card.flip .inner {
+    transform: rotateY(180deg);
 }
-.arena-bg { position:absolute; inset:0; background: radial-gradient(ellipse at 20% 80%,rgba(39,174,96,.04) 0%,transparent 40%), radial-gradient(ellipse at 80% 80%,rgba(192,57,43,.07) 0%,transparent 40%); }
-.arena-floor { position:absolute; bottom:0;left:0;right:0; height:3px; background:linear-gradient(90deg,transparent,var(--steel),var(--blood),var(--steel),transparent); }
-.player-sprite { font-size:54px; animation:playerIdle 1.2s steps(2) infinite; filter:drop-shadow(0 0 8px rgba(241,196,15,.5)); z-index:1; }
-.dragon-sprite  { font-size:70px; animation:dragonArenaFloat 3s ease-in-out infinite; filter:drop-shadow(0 0 16px rgba(192,57,43,.7)); z-index:1; }
-@keyframes playerIdle { 0%{transform:translateY(0);} 50%{transform:translateY(-4px);} }
-@keyframes dragonArenaFloat { 0%,100%{transform:translateY(0) scaleX(-1);} 50%{transform:translateY(-10px) scaleX(-1);} }
 
-@keyframes playerAttack { 0%{transform:translateX(0);} 30%{transform:translateX(80px) scale(1.3);} 60%{transform:translateX(40px);} 100%{transform:translateX(0);} }
-@keyframes dragonAttackAnim { 0%{transform:scaleX(-1);} 30%{transform:translateX(-80px) scaleX(-1) scale(1.3);} 60%{transform:translateX(-30px) scaleX(-1);} 100%{transform:scaleX(-1);} }
-@keyframes dragonHurt { 0%{transform:scaleX(-1);} 20%{transform:scaleX(-1) translateX(20px);filter:drop-shadow(0 0 30px red);} 100%{transform:scaleX(-1);} }
-@keyframes playerHurt  { 0%{transform:translateX(0);} 20%{transform:translateX(-20px);filter:drop-shadow(0 0 30px red);} 100%{transform:translateX(0);} }
-@keyframes screenShake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-7px) rotate(-.5deg);} 75%{transform:translateX(7px) rotate(.5deg);} }
-
-.p-attack { animation:playerAttack .6s ease forwards !important; }
-.d-hurt    { animation:dragonHurt  .6s ease forwards !important; }
-.p-hurt    { animation:playerHurt  .6s ease forwards !important; }
-.d-attack  { animation:dragonAttackAnim .6s ease forwards !important; }
-.shaking   { animation:screenShake .35s ease; }
-
-/* DIFFICULTY BADGE */
-.diff-badge { display:inline-block; font-family:'Black Ops One',cursive; font-size:11px; letter-spacing:3px; padding:3px 10px; border:1px solid; }
-.diff-badge.easy   { color:var(--green); border-color:var(--green); }
-.diff-badge.medium { color:var(--gold);  border-color:var(--gold);  }
-.diff-badge.hard   { color:var(--blood); border-color:var(--blood); }
-
-/* QUESTION BOX */
-.question-box { background:var(--stone); border:2px solid var(--blood); padding:18px; position:relative; }
-.question-box::before {
-  content:'>>> PYTHON CODE <<<';
-  position:absolute; top:-10px; left:18px;
-  background:var(--stone); color:var(--blood);
-  font-size:10px; letter-spacing:3px; padding:0 8px;
+.front, .back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #222;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    backface-visibility: hidden;
 }
-.q-meta { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:10px; color:var(--dim); letter-spacing:2px; }
-.code-block {
-  background:#000; border:1px solid #2a2a2a; border-left:3px solid var(--gold);
-  padding:14px; font-family:'Share Tech Mono',monospace; font-size:14px;
-  color:#e8e0d0; white-space:pre; overflow-x:auto; margin-bottom:14px; line-height:1.65;
-}
-.question-text { color:var(--gold); font-size:13px; letter-spacing:2px; font-family:'Black Ops One',cursive; margin-bottom:14px; }
 
-/* OPTIONS */
-.options-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
-.option-btn {
-  background:var(--steel); border:1px solid #3a3a3a; color:var(--text);
-  font-family:'Share Tech Mono',monospace; font-size:13px;
-  padding:11px 14px; cursor:pointer; text-align:left; transition:all .15s;
-  position:relative; overflow:hidden;
-}
-.option-btn::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; background:var(--dim); transition:background .15s; }
-.option-btn:hover:not(:disabled) { background:#3c3c3c; border-color:var(--gold); color:var(--gold); transform:translateX(4px); }
-.option-btn:hover:not(:disabled)::before { background:var(--gold); }
-.option-btn.correct { background:rgba(39,174,96,.18); border-color:var(--green); color:var(--green); }
-.option-btn.correct::before { background:var(--green); }
-.option-btn.wrong   { background:rgba(192,57,43,.18); border-color:var(--blood); color:var(--blood); }
-.option-btn.wrong::before { background:var(--blood); }
-.option-btn:disabled { cursor:not-allowed; opacity:.7; transform:none !important; }
-.opt-letter { color:var(--dim); margin-right:9px; font-size:11px; }
-
-/* INPUT TYPE */
-.input-wrap { display:flex; gap:10px; }
-.code-input {
-  flex:1; background:#000; border:2px solid var(--steel); color:var(--gold);
-  font-family:'Share Tech Mono',monospace; font-size:15px;
-  padding:12px 16px; outline:none; letter-spacing:2px;
-  transition:border-color .2s;
-}
-.code-input:focus { border-color:var(--gold); box-shadow:0 0 12px rgba(241,196,15,.2); }
-.code-input::placeholder { color:#444; }
-.submit-btn {
-  font-family:'Black Ops One',cursive; font-size:13px; letter-spacing:3px;
-  background:var(--blood); color:var(--text); border:none;
-  padding:12px 22px; cursor:pointer; transition:all .2s;
-  clip-path: polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
-}
-.submit-btn:hover { background:var(--gold); color:var(--dark); }
-
-/* PROGRESS */
-.progress-wrap { }
-.progress-bar-bg { height:5px; background:var(--steel); }
-.progress-bar-fill { height:100%; background:linear-gradient(90deg,var(--blood),var(--gold)); transition:width .5s ease; box-shadow:0 0 8px rgba(241,196,15,.4); }
-.progress-text { font-size:10px; color:var(--dim); letter-spacing:2px; text-align:right; margin-top:3px; }
-
-/* BATTLE LOG */
-.skull-row { display:flex; align-items:center; gap:8px; color:#333; font-size:11px; letter-spacing:3px; }
-.skull-row::before,.skull-row::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,#333); }
-.skull-row::after { background:linear-gradient(90deg,#333,transparent); }
-.battle-log { background:#000; border:1px solid var(--steel); padding:10px 14px; font-size:11px; color:var(--dim); min-height:46px; letter-spacing:1px; line-height:1.9; max-height:90px; overflow-y:auto; }
-.log-good { color:var(--green); }
-.log-bad  { color:var(--blood); }
-.log-info { color:var(--gold);  }
-.log-hint { color:#5588aa; }
-
-/* PARTICLES */
-.particle { position:fixed; pointer-events:none; font-size:18px; animation:pFall 1.4s ease forwards; z-index:100; }
-@keyframes pFall { 0%{opacity:1;transform:translate(0,0) scale(1) rotate(0);} 100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0) rotate(var(--rot));} }
-
-/* FLASH */
-@keyframes flashGood { 0%{background:rgba(39,174,96,.25);} 100%{background:transparent;} }
-@keyframes flashBad  { 0%{background:rgba(192,57,43,.25);} 100%{background:transparent;} }
-.flash-good { animation:flashGood .5s ease; }
-.flash-bad  { animation:flashBad  .5s ease; }
-
-/* ── RESULT SCREEN ── */
-#result-screen { display:none; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; gap:22px; text-align:center; }
-.result-title { font-family:'Black Ops One',cursive; font-size:clamp(42px,8vw,82px); letter-spacing:6px; animation:titlePulse 2s ease-in-out infinite; }
-.result-title.victory { color:var(--gold); text-shadow:0 0 40px rgba(241,196,15,.8),4px 4px 0 var(--blood); }
-.result-title.defeat  { color:var(--blood); text-shadow:0 0 40px rgba(192,57,43,.8),4px 4px 0 #333; }
-.result-stats { background:var(--stone); border:1px solid var(--steel); padding:22px 36px; width:100%; max-width:420px; }
-.stat-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--steel); font-size:12px; letter-spacing:2px; }
-.stat-row:last-child { border-bottom:none; }
-.stat-val { color:var(--gold); }
-.play-btn {
-  font-family:'Black Ops One',cursive; font-size:16px; letter-spacing:4px;
-  background:var(--blood); color:var(--text); border:none;
-  padding:14px 44px; cursor:pointer; transition:all .2s;
-  clip-path: polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
-}
-.play-btn:hover { background:var(--gold); color:var(--dark); transform:scale(1.05); box-shadow:0 0 28px rgba(241,196,15,.4); }
-.back-btn {
-  background:transparent; border:1px solid var(--steel); color:var(--dim);
-  font-family:'Share Tech Mono',monospace; font-size:12px; letter-spacing:3px;
-  padding:10px 28px; cursor:pointer; transition:all .2s;
-}
-.back-btn:hover { border-color:var(--dim); color:var(--text); }
-
-/* RESPONSIVE */
-@media(max-width:600px) {
-  .options-grid { grid-template-columns:1fr; }
-  .arena { height:120px; padding:0 20px 14px; }
-  .player-sprite { font-size:42px; }
-  .dragon-sprite  { font-size:54px; }
-  .diff-grid { grid-template-columns:1fr; max-width:280px; }
+.back {
+    background: #444;
+    transform: rotateY(180deg);
 }
 </style>
 </head>
+
 <body>
-<div id="screen">
 
-<!-- ══ TITLE ══ -->
-<div id="title-screen">
-  <div style="font-size:12px;letter-spacing:6px;color:var(--blood)">⚔ ИСПЫТАНИЕ КОДОМ ⚔</div>
-  <div class="game-title">PYTHON<br>SLAYER</div>
-  <div class="dragon-big">🐉</div>
-  <div class="subtitle">ВЫБЕРИ УРОВЕНЬ СЛОЖНОСТИ</div>
-  <div class="diff-label">— АРЕНА —</div>
-  <div class="diff-grid">
-    <button class="diff-btn easy" onclick="startGame('easy')">
-      <span>🗡 ЛЁГКИЙ<br><span class="diff-sub">простые операции<br>3 жизни / 10 вопросов</span></span>
-    </button>
-    <button class="diff-btn medium" onclick="startGame('medium')">
-      <span>⚔ СРЕДНИЙ<br><span class="diff-sub">длиннее, но не сложнее<br>3 жизни / 12 вопросов</span></span>
-    </button>
-    <button class="diff-btn hard" onclick="startGame('hard')">
-      <span>🔥 ТЯЖЁЛЫЙ<br><span class="diff-sub">рекурсия, ООП, замыкания<br>2 жизни / 14 вопросов</span></span>
-    </button>
-  </div>
-  <p style="color:var(--dim);font-size:11px;letter-spacing:2px;max-width:420px;line-height:2.2;margin-top:4px">
-    ПРАВИЛЬНЫЙ ОТВЕТ → ДРАКОН ТЕРЯЕТ 1 HP<br>
-    НЕВЕРНЫЙ ОТВЕТ → ТЫ ТЕРЯЕШЬ ЖИЗНЬ<br>
-    ВОПРОСЫ ПЕРЕМЕШИВАЮТСЯ КАЖДЫЙ РАЗ
-  </p>
-  <div class="fire-row">🔥 🔥 🔥 🔥 🔥</div>
+<h1>Карточки по химии</h1>
+
+<div class="controls">
+    <button onclick="shuffle()">Перемешать</button>
+    <button onclick="swap()">Поменять местами</button>
 </div>
 
-<!-- ══ BATTLE ══ -->
-<div id="battle-screen">
-  <div class="battle-header" id="battle-header">⚔ PYTHON SLAYER — АРЕНА ⚔</div>
-
-  <!-- HP -->
-  <div class="combatants">
-    <div class="fighter-panel">
-      <div class="fighter-name player">⚔ КОДЕР</div>
-      <div class="hp-bar-wrap"><div class="hp-bar player-hp" id="player-hp-bar" style="width:100%"></div></div>
-      <div class="hp-text"><span class="hearts" id="hearts"></span></div>
-    </div>
-    <div class="vs-badge">VS</div>
-    <div class="fighter-panel" style="text-align:right">
-      <div class="fighter-name dragon">ДРАКОН 🐉</div>
-      <div class="hp-bar-wrap"><div class="hp-bar dragon-hp" id="dragon-hp-bar" style="width:100%"></div></div>
-      <div class="hp-text dragon"><span id="dragon-hp-text">? / ?</span> HP</div>
-    </div>
-  </div>
-
-  <!-- ARENA -->
-  <div class="arena" id="arena">
-    <div class="arena-bg"></div>
-    <div class="player-sprite" id="ps">🧙</div>
-    <div class="dragon-sprite"  id="ds">🐉</div>
-    <div class="arena-floor"></div>
-  </div>
-
-  <!-- PROGRESS -->
-  <div class="progress-wrap">
-    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
-    <div class="progress-text" id="progress-text">ВОПРОС 0 / 0</div>
-  </div>
-
-  <!-- QUESTION -->
-  <div class="question-box" id="question-box">
-    <div class="q-meta">
-      <span>ВОПРОС <span id="q-num">1</span></span>
-      <span id="diff-badge-wrap"></span>
-    </div>
-    <div class="code-block" id="code-display"></div>
-    <div class="question-text" id="question-text"></div>
-    <div id="answer-area"></div>
-  </div>
-
-  <!-- LOG -->
-  <div class="skull-row">💀 ЖУРНАЛ БОЯ 💀</div>
-  <div class="battle-log" id="battle-log"><span class="log-info">> Битва начинается... Дракон скалит зубы.</span></div>
-</div>
-
-<!-- ══ RESULT ══ -->
-<div id="result-screen">
-  <div class="result-title" id="result-title"></div>
-  <div style="font-size:64px" id="result-emoji"></div>
-  <div class="result-stats" id="result-stats"></div>
-  <button class="play-btn" onclick="resetGame()">СЫГРАТЬ СНОВА</button>
-  <button class="back-btn" onclick="goTitle()">↩ ВЫБОР УРОВНЯ</button>
-</div>
-
-</div><!-- #screen -->
+<div class="container" id="cards"></div>
 
 <script>
-/* ═══════════════════════════════════════════════
-   QUESTION BANK
-═══════════════════════════════════════════════ */
-const BANK = {
+let swapped = false;
 
-/* ─── EASY ─── */
-easy: [
-  { type:'choice', code:`print(2 + 3)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'5', options:['23','5','6','2+3','Error'] },
-  { type:'choice', code:`print(10 - 4)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'6', options:['14','40','6','4','Error'] },
-  { type:'choice', code:`print(3 * 4)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'12', options:['7','34','12','3','Error'] },
-  { type:'choice', code:`print(9 / 3)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'3.0', options:['3','3.0','9','0','Error'] },
-  { type:'choice', code:`print(10 % 3)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'1', options:['3','1','0','10','33'] },
-  { type:'choice', code:`x = 5\nprint(x)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'5', options:['x','0','5','None','Error'] },
-  { type:'choice', code:`x = 4\ny = 6\nprint(x + y)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'10', options:['46','2','10','xy','Error'] },
-  { type:'choice', code:`print("Привет!")`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'Привет!', options:['Привет!','привет!','Error','None','"Привет!"'] },
-  { type:'choice', code:`a = 10\na = a + 5\nprint(a)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'15', options:['10','5','15','a+5','Error'] },
-  { type:'choice', code:`x = 3\nif x > 1:\n    print("да")`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'да', options:['нет','да','x > 1','None','Error'] },
-  { type:'choice', code:`x = 0\nif x > 1:\n    print("да")\nelse:\n    print("нет")`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'нет', options:['да','нет','0','None','Error'] },
-  { type:'choice', code:`nums = [1, 2, 3]\nprint(nums[0])`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'1', options:['0','1','3','[1]','Error'] },
-  { type:'choice', code:`nums = [10, 20, 30]\nprint(nums[-1])`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'30', options:['10','20','30','-1','Error'] },
-  { type:'choice', code:`s = "python"\nprint(len(s))`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'6', options:['5','6','7','python','Error'] },
-  { type:'choice', code:`print(type(5))`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:"<class 'int'>", options:["int","<class 'int'>","5","number","Error"] },
-  { type:'input',  code:`x = 7\ny = 3\nprint(x - y)`, q:'ВВЕДИ ВЫВОД ПРОГРАММЫ:', answer:'4' },
-  { type:'input',  code:`print(2 ** 3)`, q:'ВВЕДИ ВЫВОД ПРОГРАММЫ:', answer:'8' },
-  { type:'input',  code:`a = "Дракон"\nprint(len(a))`, q:'ВВЕДИ ВЫВОД ПРОГРАММЫ:', answer:'6' },
-  { type:'input',  code:`x = 5\nif x == 5:\n    print("пять")`, q:'ВВЕДИ ВЫВОД ПРОГРАММЫ:', answer:'пять' },
-  { type:'input',  code:`print(10 // 3)`, q:'ВВЕДИ ВЫВОД ПРОГРАММЫ:', answer:'3' },
-],
+let data = [
+    ["лимонная кислота", "пищевая промышленность, удаление накипи"],
+    ["стеарат натрия", "производство моющих средств"],
+    ["триолеин", "производство маргарина"],
+    ["капрон", "текстильные волокна"],
+    ["анилин", "красители и лекарства"],
+    ["целлюлоза", "производство бумаги"],
+    ["метан, пропан", "топливо"],
+    ["этилен", "пластмассы и этанол"],
+    ["ацетилен", "сварка и пластмассы"],
+    ["пропилен, стирол", "пластмассы"],
+    ["полипропилен", "упаковка"],
+    ["изопрен", "каучук"],
+    ["ацетон", "растворитель"],
+    ["этанол", "медицина и пища"],
+    ["формальдегид", "пластмассы"],
+    ["этиленгликоль", "антифриз"],
+    ["глицерин", "косметика"],
+    ["тринитроглицерин", "взрывчатка"],
+    ["уксусная кислота", "консерванты"]
+];
 
-/* ─── MEDIUM ─── */
-medium: [
-  { type:'choice', code:`x = 10\nx += 3\nx -= 1\nprint(x)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'12', options:['10','13','12','11','Error'] },
-  { type:'choice', code:`a = 4\nb = 5\nif a > b:\n    print("a больше")\nelif a == b:\n    print("равны")\nelse:\n    print("b больше")`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'b больше', options:['a больше','равны','b больше','None','Error'] },
-  { type:'choice', code:`nums = [3, 1, 4, 1, 5]\nnums.sort()\nprint(nums)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'[1, 1, 3, 4, 5]', options:['[3,1,4,1,5]','[1, 1, 3, 4, 5]','[5,4,3,1,1]','[1,3,4,5]','Error'] },
-  { type:'choice', code:`total = 0\nfor i in range(1, 5):\n    total += i\nprint(total)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'10', options:['4','10','15','6','Error'] },
-  { type:'choice', code:`s = "ДРАКОН"\nprint(s.lower())`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'дракон', options:['ДРАКОН','Дракон','дракон','дРАКОН','Error'] },
-  { type:'choice', code:`words = ["огонь", "меч", "щит"]\nprint(", ".join(words))`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'огонь, меч, щит', options:['огоньмечщит','огонь меч щит','огонь, меч, щит','["огонь","меч","щит"]','Error'] },
-  { type:'choice', code:`d = {"hp": 100, "атака": 20}\nprint(d["hp"])`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'100', options:['hp','20','100','None','Error'] },
-  { type:'choice', code:`x = 15\nif x % 2 == 0:\n    print("чётное")\nelse:\n    print("нечётное")`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'нечётное', options:['чётное','нечётное','15','0','Error'] },
-  { type:'choice', code:`def square(n):\n    return n * n\n\nprint(square(7))`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'49', options:['7','14','49','77','Error'] },
-  { type:'choice', code:`a = [1, 2, 3, 4, 5]\nprint(a[1:4])`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'[2, 3, 4]', options:['[1,2,3]','[2, 3, 4]','[1,2,3,4]','[3,4,5]','Error'] },
-  { type:'choice', code:`count = 0\ni = 0\nwhile i < 5:\n    if i % 2 == 0:\n        count += 1\n    i += 1\nprint(count)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'3', options:['2','3','4','5','Error'] },
-  { type:'choice', code:`s = "python"\nprint(s[0].upper() + s[1:])`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'Python', options:['python','PYTHON','Python','Pthon','Error'] },
-  { type:'choice', code:`nums = [5, 3, 8, 1, 9]\nprint(max(nums) - min(nums))`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'8', options:['4','9','8','14','Error'] },
-  { type:'choice', code:`x = 100\ny = 200\nz = x + y\nif z > 250:\n    print("много")\nelse:\n    print("мало")`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'много', options:['мало','много','300','250','Error'] },
-  { type:'input',  code:`result = []\nfor i in range(3):\n    result.append(i * 2)\nprint(result)`, q:'ВВЕДИ ВЫВОД ПРОГРАММЫ:', answer:'[0, 2, 4]' },
-  { type:'input',  code:`x = 5\ny = 10\nif x < y:\n    print(x + y)\nelse:\n    print(x - y)`, q:'ВВЕДИ ВЫВОД ПРОГРАММЫ:', answer:'15' },
-  { type:'input',  code:`def multiply(a, b):\n    return a * b\n\nprint(multiply(6, 7))`, q:'ВВЕДИ ВЫВОД ПРОГРАММЫ:', answer:'42' },
-  { type:'input',  code:`s = "Привет Дракон"\nwords = s.split()\nprint(len(words))`, q:'ВВЕДИ ВЫВОД ПРОГРАММЫ:', answer:'2' },
-],
+function render() {
+    let container = document.getElementById("cards");
+    container.innerHTML = "";
 
-/* ─── HARD ─── */
-hard: [
-  { type:'choice', code:`def f(n):\n    if n <= 1:\n        return n\n    return f(n-1) + f(n-2)\n\nprint(f(7))`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'13', options:['8','12','13','21','Error'] },
-  { type:'choice', code:`a = [1, 2, 3]\nb = a[:]\nb.append(4)\nprint(len(a), len(b))`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'3 4', options:['4 4','3 3','3 4','4 3','Error'] },
-  { type:'choice', code:`d = {}\nfor i in range(4):\n    d[i] = i ** 2\nprint(d[3])`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'9', options:['3','6','9','12','Error'] },
-  { type:'choice', code:`x = [1, [2, 3], [4, [5, 6]]]\nprint(x[2][1][0])`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'5', options:['4','5','6','2','Error'] },
-  { type:'choice', code:`def make_counter():\n    count = 0\n    def inc():\n        nonlocal count\n        count += 1\n        return count\n    return inc\n\nc = make_counter()\nprint(c(), c(), c())`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'1 2 3', options:['0 1 2','1 2 3','1 1 1','Error','None'] },
-  { type:'choice', code:`nums = [1, 2, 3, 4, 5, 6]\nevens = list(filter(lambda x: x % 2 == 0, nums))\nprint(sum(evens))`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'12', options:['6','9','12','21','Error'] },
-  { type:'choice', code:`class Hero:\n    def __init__(self, name):\n        self.name = name\n        self.hp = 100\n\nh = Hero("Кодер")\nh.hp -= 30\nprint(h.hp)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'70', options:['100','30','70','0','Error'] },
-  { type:'choice', code:`result = 1\nfor i in range(1, 6):\n    result *= i\nprint(result)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'120', options:['15','60','120','720','Error'] },
-  { type:'choice', code:`s = "abcdef"\nprint(s[::2])`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'ace', options:['bdf','ace','abcdef','abc','Error'] },
-  { type:'choice', code:`def power(base, exp=2):\n    return base ** exp\n\nprint(power(3), power(2, 4))`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'9 16', options:['6 8','9 16','9 8','3 16','Error'] },
-  { type:'choice', code:`try:\n    x = int("дракон")\nexcept ValueError:\n    x = -1\nprint(x)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'-1', options:['0','дракон','-1','None','Error'] },
-  { type:'choice', code:`matrix = [[i*j for j in range(1,4)] for i in range(1,4)]\nprint(matrix[1][2])`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'6', options:['3','4','6','9','Error'] },
-  { type:'choice', code:`from functools import reduce\nnums = [1, 2, 3, 4]\nresult = reduce(lambda a,b: a+b, nums)\nprint(result)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'10', options:['24','10','6','Error','None'] },
-  { type:'choice', code:`class Animal:\n    sound = "...\"\n\nclass Dog(Animal):\n    sound = "Гав"\n\nclass Cat(Animal):\n    pass\n\nprint(Dog.sound, Cat.sound)`, q:'ЧТО ВЫВЕДЕТ КОД?', answer:'Гав ...', options:['Гав Гав','... Гав','Гав ...','... ...','Error'] },
-  { type:'input',  code:`gen = (x**2 for x in range(5))\nprint(sum(gen))`, q:'ВВЕДИ ВЫВОД ПРОГРАММЫ:', answer:'30' },
-  { type:'input',  code:`def deco(fn):\n    def wrap(*args):\n        return fn(*args) * 2\n    return wrap\n\n@deco\ndef add(a, b):\n    return a + b\n\nprint(add(3, 4))`, q:'ВВЕДИ ВЫВОД ПРОГРАММЫ:', answer:'14' },
-  { type:'input',  code:`data = [3, 1, 4, 1, 5, 9, 2, 6]\nprint(sorted(set(data))[2])`, q:'ВВЕДИ ВЫВОД ПРОГРАММЫ:', answer:'3' },
-  { type:'input',  code:`def count_up(n):\n    if n == 0:\n        return 0\n    return 1 + count_up(n - 1)\n\nprint(count_up(5))`, q:'ВВЕДИ ВЫВОД ПРОГРАММЫ:', answer:'5' },
-],
-};
+    data.forEach(item => {
+        let card = document.createElement("div");
+        card.className = "card";
 
-/* ═══════════════════════════════════════════════
-   GAME STATE
-═══════════════════════════════════════════════ */
-let G = {};
-const DIFF_CONFIG = {
-  easy:   { lives:3, count:10, label:'ЛЁГКИЙ',  cls:'easy'   },
-  medium: { lives:3, count:12, label:'СРЕДНИЙ', cls:'medium' },
-  hard:   { lives:2, count:14, label:'ТЯЖЁЛЫЙ', cls:'hard'   },
-};
-const LETTERS = ['A','B','C','D','E'];
+        let inner = document.createElement("div");
+        inner.className = "inner";
 
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length-1; i > 0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]] = [a[j],a[i]];
-  }
-  return a;
-}
+        let front = document.createElement("div");
+        front.className = "front";
+        front.innerText = swapped ? item[1] : item[0];
 
-function startGame(diff) {
-  const cfg = DIFF_CONFIG[diff];
-  const pool = shuffle(BANK[diff]).slice(0, cfg.count);
+        let back = document.createElement("div");
+        back.className = "back";
+        back.innerText = swapped ? item[0] : item[1];
 
-  G = {
-    diff, cfg,
-    questions: pool,
-    idx: 0,
-    playerHP: cfg.lives,
-    dragonHP: pool.length,
-    totalDragon: pool.length,
-    correct: 0,
-    wrong: 0,
-    locked: false,
-  };
+        inner.appendChild(front);
+        inner.appendChild(back);
+        card.appendChild(inner);
 
-  document.getElementById('title-screen').style.display = 'none';
-  const bs = document.getElementById('battle-screen');
-  bs.style.display = 'flex';
-  document.getElementById('battle-header').textContent = `⚔ PYTHON SLAYER — ${cfg.label} ⚔`;
+        card.onclick = () => card.classList.toggle("flip");
 
-  updateUI();
-  showQuestion();
-}
-
-function updateUI() {
-  const playerPct = (G.playerHP / G.cfg.lives) * 100;
-  const dragonPct = (G.dragonHP / G.totalDragon) * 100;
-  document.getElementById('player-hp-bar').style.width = playerPct + '%';
-  document.getElementById('dragon-hp-bar').style.width = dragonPct + '%';
-  document.getElementById('dragon-hp-text').textContent = G.dragonHP + ' / ' + G.totalDragon;
-
-  let hearts = '';
-  for (let i = 0; i < G.cfg.lives; i++)
-    hearts += `<span class="heart${i < G.playerHP ? '' : ' lost'}">${i < G.playerHP ? '❤️' : '🖤'}</span>`;
-  document.getElementById('hearts').innerHTML = hearts;
-
-  const pct = (G.idx / G.totalDragon) * 100;
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-text').textContent = `ВОПРОС ${G.idx} / ${G.totalDragon}`;
-}
-
-function showQuestion() {
-  if (G.idx >= G.questions.length) { endGame(true); return; }
-  const q = G.questions[G.idx];
-  G.locked = false;
-
-  document.getElementById('q-num').textContent = G.idx + 1;
-  document.getElementById('code-display').textContent = q.code;
-  document.getElementById('question-text').textContent = q.q;
-
-  const cfg = G.cfg;
-  document.getElementById('diff-badge-wrap').innerHTML =
-    `<span class="diff-badge ${cfg.cls}">${cfg.label}</span>`;
-
-  const area = document.getElementById('answer-area');
-  area.innerHTML = '';
-
-  if (q.type === 'choice') {
-    const shuffledOpts = shuffle(q.options);
-    const grid = document.createElement('div');
-    grid.className = 'options-grid';
-    shuffledOpts.forEach((opt, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'option-btn';
-      btn.innerHTML = `<span class="opt-letter">[${LETTERS[i]}]</span>${opt}`;
-      btn.onclick = () => choiceAnswer(opt, btn, grid, q);
-      grid.appendChild(btn);
+        container.appendChild(card);
     });
-    area.appendChild(grid);
-  } else {
-    // INPUT type
-    const wrap = document.createElement('div');
-    wrap.className = 'input-wrap';
-    const inp = document.createElement('input');
-    inp.className = 'code-input';
-    inp.placeholder = 'Введи ответ здесь...';
-    inp.autocomplete = 'off';
-    inp.spellcheck = false;
-    const btn = document.createElement('button');
-    btn.className = 'submit-btn';
-    btn.textContent = 'АТАКА ⚔';
-    const submit = () => {
-      if (G.locked) return;
-      inputAnswer(inp.value.trim(), inp, btn, q);
-    };
-    btn.onclick = submit;
-    inp.onkeydown = e => { if (e.key === 'Enter') submit(); };
-    wrap.appendChild(inp);
-    wrap.appendChild(btn);
-    area.appendChild(wrap);
-    setTimeout(() => inp.focus(), 50);
-  }
-
-  updateUI();
 }
 
-function choiceAnswer(chosen, clickedBtn, grid, q) {
-  if (G.locked) return;
-  G.locked = true;
-  const correct = chosen === q.answer;
-  Array.from(grid.children).forEach(b => b.disabled = true);
-  clickedBtn.classList.add(correct ? 'correct' : 'wrong');
-  resolveAnswer(correct, q, clickedBtn);
+function shuffle() {
+    data.sort(() => Math.random() - 0.5);
+    render();
 }
 
-function inputAnswer(typed, inp, btn, q) {
-  G.locked = true;
-  inp.disabled = true;
-  btn.disabled = true;
-  const correct = typed === q.answer;
-  inp.style.borderColor = correct ? 'var(--green)' : 'var(--blood)';
-  inp.style.color = correct ? 'var(--green)' : 'var(--blood)';
-  resolveAnswer(correct, q, btn);
+function swap() {
+    swapped = !swapped;
+    render();
 }
 
-function resolveAnswer(correct, q, el) {
-  if (correct) {
-    G.dragonHP--;
-    G.correct++;
-    addLog(`<span class="log-good">> ВЕРНО! Удар нанесён дракону! (-1 HP)</span>`);
-    if (q.type === 'input') addLog(`<span class="log-hint">> Ответ: ${q.answer}</span>`);
-    animPlayerAttack();
-    spawnParticles(el, '⚔', 5);
-  } else {
-    G.playerHP--;
-    G.wrong++;
-    addLog(`<span class="log-bad">> НЕВЕРНО! Дракон атакует!</span>`);
-    addLog(`<span class="log-hint">> Правильный ответ: ${q.answer}</span>`);
-    animDragonAttack();
-    spawnParticles(el, '🔥', 5);
-  }
-
-  G.idx++;
-  updateUI();
-
-  const arena = document.getElementById('arena');
-  arena.classList.add(correct ? 'flash-good' : 'flash-bad');
-  setTimeout(() => arena.classList.remove('flash-good','flash-bad'), 500);
-
-  setTimeout(() => {
-    if (G.playerHP <= 0) { endGame(false); return; }
-    if (G.dragonHP <= 0) { endGame(true);  return; }
-    if (G.idx >= G.questions.length) { endGame(G.dragonHP <= 0); return; }
-    showQuestion();
-  }, 900);
-}
-
-/* ═══ ANIMATIONS ═══ */
-function animPlayerAttack() {
-  const p = document.getElementById('ps'), d = document.getElementById('ds');
-  p.classList.add('p-attack');
-  setTimeout(() => d.classList.add('d-hurt'), 280);
-  setTimeout(() => { p.classList.remove('p-attack'); d.classList.remove('d-hurt'); }, 720);
-}
-function animDragonAttack() {
-  const p = document.getElementById('ps'), d = document.getElementById('ds');
-  d.classList.add('d-attack');
-  setTimeout(() => p.classList.add('p-hurt'), 280);
-  setTimeout(() => { d.classList.remove('d-attack'); p.classList.remove('p-hurt'); }, 720);
-  document.getElementById('screen').classList.add('shaking');
-  setTimeout(() => document.getElementById('screen').classList.remove('shaking'), 400);
-}
-function spawnParticles(src, emoji, n) {
-  const r = src.getBoundingClientRect();
-  for (let i = 0; i < n; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle'; p.textContent = emoji;
-    p.style.left = (r.left + r.width/2) + 'px';
-    p.style.top  = (r.top  + r.height/2) + 'px';
-    const a = Math.random()*Math.PI*2, d = 60 + Math.random()*80;
-    p.style.setProperty('--tx', Math.cos(a)*d + 'px');
-    p.style.setProperty('--ty', Math.sin(a)*d + 'px');
-    p.style.setProperty('--rot', (Math.random()*720-360) + 'deg');
-    p.style.animationDelay = Math.random()*.15 + 's';
-    document.body.appendChild(p);
-    setTimeout(() => p.remove(), 1800);
-  }
-}
-function addLog(html) {
-  const log = document.getElementById('battle-log');
-  log.innerHTML += '<br>' + html;
-  log.scrollTop = log.scrollHeight;
-}
-
-/* ═══ END GAME ═══ */
-function endGame(victory) {
-  document.getElementById('battle-screen').style.display = 'none';
-  const rs = document.getElementById('result-screen');
-  rs.style.display = 'flex';
-
-  document.getElementById('result-title').textContent = victory ? 'ПОБЕДА!' : 'ПОРАЖЕНИЕ';
-  document.getElementById('result-title').className = 'result-title ' + (victory ? 'victory' : 'defeat');
-  document.getElementById('result-emoji').textContent = victory ? '🏆' : '💀';
-
-  const acc = G.idx > 0 ? Math.round(G.correct / G.idx * 100) : 0;
-  document.getElementById('result-stats').innerHTML = `
-    <div class="stat-row"><span>УРОВЕНЬ СЛОЖНОСТИ</span><span class="stat-val">${G.cfg.label}</span></div>
-    <div class="stat-row"><span>ПРАВИЛЬНЫХ</span><span class="stat-val">${G.correct} / ${G.idx}</span></div>
-    <div class="stat-row"><span>НЕВЕРНЫХ</span><span class="stat-val">${G.wrong}</span></div>
-    <div class="stat-row"><span>ТОЧНОСТЬ</span><span class="stat-val">${acc}%</span></div>
-    <div class="stat-row"><span>ОСТАЛОСЬ HP (ТЫ)</span><span class="stat-val">${G.playerHP} / ${G.cfg.lives}</span></div>
-    <div class="stat-row"><span>ОСТАЛОСЬ HP (ДРАКОН)</span><span class="stat-val">${G.dragonHP} / ${G.totalDragon}</span></div>
-    <div class="stat-row"><span>РАНГ</span><span class="stat-val">${getRank(acc, G.diff)}</span></div>
-  `;
-}
-function getRank(acc, diff) {
-  if (acc === 100 && diff === 'hard') return '🐉 DRAGON LORD';
-  if (acc === 100) return '🏆 ИДЕАЛЬНЫЙ КОДЕР';
-  if (acc >= 80)  return '⚔ PYTHON WARRIOR';
-  if (acc >= 60)  return '🛡 УЧЕНИК';
-  if (acc >= 40)  return '📜 НОВИЧОК';
-  return '💀 ЕДА ДЛЯ ДРАКОНА';
-}
-function resetGame() {
-  document.getElementById('result-screen').style.display = 'none';
-  document.getElementById('battle-log').innerHTML = '<span class="log-info">> Битва начинается... Дракон скалит зубы.</span>';
-  startGame(G.diff);
-}
-function goTitle() {
-  document.getElementById('result-screen').style.display = 'none';
-  document.getElementById('title-screen').style.display = 'flex';
-}
+render();
 </script>
+
 </body>
 </html>

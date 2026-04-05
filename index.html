@@ -93,7 +93,7 @@ function nextCard() {
   current++;
 
   if (current >= cards.length) {
-    document.getElementById("stats").innerText = 💖 Ты прошла всё! Просмотрено: ${viewed};
+    document.getElementById("stats").innerText = `💖 Ты прошла всё! Просмотрено: ${viewed}`;
     current = 0;
     viewed = 0;
   }

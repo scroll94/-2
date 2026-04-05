@@ -1,151 +1,69 @@
-<!DOCTYPE html>
-<html lang="ru">
+<!DOCTYPE html><html lang="ru">
 <head>
 <meta charset="UTF-8">
 <title>Карточки по химии</title>
-
 <style>
 body {
-    font-family: Arial;
-    background: #111;
-    color: white;
-    text-align: center;
-}
+  font-family: Arial;
+  background: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}.card { width: 300px; height: 200px; perspective: 1000px; margin-top: 50px; cursor: pointer; }
 
-.controls {
-    margin: 20px;
-}
+.inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s; }
 
-button {
-    padding: 10px 15px;
-    margin: 5px;
-    border: none;
-    cursor: pointer;
-    border-radius: 8px;
-}
+.flipped { transform: rotateY(180deg); }
 
-.container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
+.front, .back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; justify-content: center; align-items: center; border-radius: 12px; font-size: 18px; padding: 10px; }
 
-.card {
-    width: 200px;
-    height: 120px;
-    margin: 10px;
-    perspective: 1000px;
-}
+.front { background: white; }
 
-.inner {
-    width: 100%;
-    height: 100%;
-    transition: 0.6s;
-    transform-style: preserve-3d;
-    position: relative;
-}
+.back { background: lightblue; transform: rotateY(180deg); }
 
-.card.flip .inner {
-    transform: rotateY(180deg);
-}
+button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
 
-.front, .back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: #222;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    backface-visibility: hidden;
-}
-
-.back {
-    background: #444;
-    transform: rotateY(180deg);
-}
 </style>
 </head>
+<body><h2>Карточки по химии</h2><div class="card" onclick="flipCard()">
+  <div id="cardInner" class="inner">
+    <div class="front" id="frontText"></div>
+    <div class="back" id="backText"></div>
+  </div>
+</div><button onclick="nextCard()">Следующая</button>
 
-<body>
+<p id="stats"></p><script>
 
-<h1>Карточки по химии</h1>
-
-<div class="controls">
-    <button onclick="shuffle()">Перемешать</button>
-    <button onclick="swap()">Поменять местами</button>
-</div>
-
-<div class="container" id="cards"></div>
-
-<script>
-let swapped = false;
-
-let data = [
-    ["лимонная кислота", "пищевая промышленность, удаление накипи"],
-    ["стеарат натрия", "производство моющих средств"],
-    ["триолеин", "производство маргарина"],
-    ["капрон", "текстильные волокна"],
-    ["анилин", "красители и лекарства"],
-    ["целлюлоза", "производство бумаги"],
-    ["метан, пропан", "топливо"],
-    ["этилен", "пластмассы и этанол"],
-    ["ацетилен", "сварка и пластмассы"],
-    ["пропилен, стирол", "пластмассы"],
-    ["полипропилен", "упаковка"],
-    ["изопрен", "каучук"],
-    ["ацетон", "растворитель"],
-    ["этанол", "медицина и пища"],
-    ["формальдегид", "пластмассы"],
-    ["этиленгликоль", "антифриз"],
-    ["глицерин", "косметика"],
-    ["тринитроглицерин", "взрывчатка"],
-    ["уксусная кислота", "консерванты"]
+const cards = [
+  {q: "метан, пропан, нефть, природный газ", a: "в качестве топлива"},
+  {q: "этилен", a: "производство пластмасс"},
+  {q: "ацетилен", a: "сварка металлов"},
+  {q: "пропилен", a: "полипропилен"},
+  {q: "изопрен", a: "каучук и резина"}
 ];
 
-function render() {
-    let container = document.getElementById("cards");
-    container.innerHTML = "";
+let current = 0;
+let flipped = false;
+let correct = 0;
 
-    data.forEach(item => {
-        let card = document.createElement("div");
-        card.className = "card";
-
-        let inner = document.createElement("div");
-        inner.className = "inner";
-
-        let front = document.createElement("div");
-        front.className = "front";
-        front.innerText = swapped ? item[1] : item[0];
-
-        let back = document.createElement("div");
-        back.className = "back";
-        back.innerText = swapped ? item[0] : item[1];
-
-        inner.appendChild(front);
-        inner.appendChild(back);
-        card.appendChild(inner);
-
-        card.onclick = () => card.classList.toggle("flip");
-
-        container.appendChild(card);
-    });
+function loadCard() {
+  document.getElementById("frontText").innerText = cards[current].q;
+  document.getElementById("backText").innerText = cards[current].a;
 }
 
-function shuffle() {
-    data.sort(() => Math.random() - 0.5);
-    render();
+function flipCard() {
+  const card = document.getElementById("cardInner");
+  card.classList.toggle("flipped");
+  flipped = !flipped;
 }
 
-function swap() {
-    swapped = !swapped;
-    render();
-}
+function nextCard() {
+  if (!flipped) {
+    alert("Сначала переверни карточку!");
+    return;
+  }
 
-render();
-</script>
+  current++;
 
-</body>
-</html>
+  if (current >= cards.length) {
+    document.getElementById("stats").innerText

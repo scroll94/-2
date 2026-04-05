@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Карточки для любимой Кариночки 💖</title>
+  <title>Карточки для любимой Кариночки 💖 Органика</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      user-select: none; /* чуть приятнее на мобилках, но текст скопировать можно */
     }
 
     body {
@@ -23,17 +22,14 @@
       padding: 1.5rem 1rem 2rem;
     }
 
-    /* контейнер всей витрины */
     .app-container {
-      max-width: 600px;
+      max-width: 650px;
       width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
     }
 
-    /* заголовок с сердечками */
     .cute-title {
       font-size: 1.7rem;
       font-weight: 700;
@@ -43,7 +39,6 @@
       color: transparent;
       text-shadow: 0 2px 8px rgba(255, 75, 110, 0.15);
       margin-bottom: 0.25rem;
-      letter-spacing: -0.3px;
       text-align: center;
     }
 
@@ -58,10 +53,9 @@
       font-weight: 500;
     }
 
-    /* карточка 3D */
     .card-scene {
       width: 100%;
-      max-width: 380px;
+      max-width: 420px;
       margin: 1rem auto;
       perspective: 1200px;
       cursor: pointer;
@@ -69,10 +63,9 @@
 
     .card {
       width: 100%;
-      aspect-ratio: 16 / 10; /* 380x237 примерно -> приятные пропорции */
+      aspect-ratio: 16 / 10;
       background: transparent;
       position: relative;
-      transition: all 0.2s;
     }
 
     .inner {
@@ -90,7 +83,6 @@
       transform: rotateY(180deg);
     }
 
-    /* общий стиль сторон */
     .front, .back {
       position: absolute;
       width: 100%;
@@ -106,10 +98,9 @@
       font-weight: 600;
       text-align: center;
       word-break: break-word;
-      transition: all 0.2s ease;
+      overflow-y: auto;
     }
 
-    /* лицевая сторона (вопрос/термин) — розово-белая */
     .front {
       background: linear-gradient(135deg, #ffffff 0%, #fff5f8 100%);
       color: #cc3366;
@@ -118,7 +109,6 @@
       transform: rotateY(0deg);
     }
 
-    /* обратная сторона (ответ/определение) — ярко-розовая */
     .back {
       background: linear-gradient(145deg, #ff2e6c, #ff4d8a);
       color: #fff9fb;
@@ -127,9 +117,8 @@
       border: 1px solid rgba(255,255,200,0.4);
     }
 
-    /* текст на карточке */
     .front-text, .back-text {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       line-height: 1.45;
       font-weight: 600;
       max-width: 100%;
@@ -155,11 +144,10 @@
     }
 
     .emoji-deco {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
     }
 
-    /* кнопочки */
     .controls {
       display: flex;
       flex-wrap: wrap;
@@ -182,14 +170,12 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      backdrop-filter: blur(2px);
       font-family: inherit;
     }
 
     button:active {
       transform: scale(0.96);
       background: #ff3a6f;
-      box-shadow: 0 2px 4px rgba(255, 60, 100, 0.4);
     }
 
     button:hover {
@@ -197,7 +183,6 @@
       transform: translateY(-2px);
     }
 
-    /* статус и прогресс */
     .stats-panel {
       margin-top: 20px;
       background: rgba(255, 240, 245, 0.8);
@@ -212,14 +197,6 @@
       flex-wrap: wrap;
       justify-content: center;
       border: 1px solid #ffbfcf;
-    }
-
-    .badge {
-      background: #ffdae4;
-      border-radius: 40px;
-      padding: 4px 14px;
-      font-size: 0.8rem;
-      color: #bb2e5c;
     }
 
     .mode-indicator {
@@ -243,7 +220,7 @@
 
     @media (max-width: 480px) {
       .front-text, .back-text {
-        font-size: 1rem;
+        font-size: 0.95rem;
       }
       .cute-title {
         font-size: 1.4rem;
@@ -261,10 +238,9 @@
     💖 Карточки для любимой Кариночки 💖
   </div>
   <div class="sub">
-    ✨ учим органику с любовью ✨
+    ✨ органическая химия — с любовью ✨
   </div>
 
-  <!-- 3D карточка -->
   <div class="card-scene">
     <div class="card" id="cardWrapper">
       <div id="cardInner" class="inner">
@@ -281,16 +257,16 @@
   </div>
 
   <div class="controls">
-    <button onclick="flipCard()">✨ Перевернуть ✨</button>
-    <button onclick="nextCard()">➡️ Следующая</button>
-    <button onclick="shuffleCards()">🃏 Перемешать</button>
-    <button onclick="toggleMode()">🔄 Сменить режим</button>
+    <button onclick="window.flipCard()">✨ Перевернуть ✨</button>
+    <button onclick="window.nextCard()">➡️ Следующая</button>
+    <button onclick="window.shuffleCards()">🃏 Перемешать</button>
+    <button onclick="window.toggleMode()">🔄 Сменить режим</button>
   </div>
 
   <div class="stats-panel" id="statsPanel">
     <span>📚 Карточка <span id="currentIndexDisplay">1</span> / <span id="totalCardsCount">0</span></span>
     <span>✅ Изучено: <span id="studiedCount">0</span></span>
-    <span id="modeDisplay" class="mode-indicator">🎓 Режим: Термин → Применение</span>
+    <span id="modeDisplay" class="mode-indicator">🎓 Режим: Вещество → Применение</span>
   </div>
   <footer>
     💗 нажми на карточку или кнопку "перевернуть" 💗
@@ -298,52 +274,52 @@
 </div>
 
 <script>
-  // ---------- БАЗА ДАННЫХ (применение + вещество) ----------
-  const originalCards = [
-    { q: "метан, пропан, нефть, природный газ", a: "используются как топливо" },
-    { q: "этилен", a: "производство пластмасс" },
-    { q: "ацетилен", a: "сварка и резка металлов" },
-    { q: "пропилен", a: "полипропилен" },
-    { q: "изопрен, бутадиен", a: "каучук и резина" },
-    { q: "ацетон, метанол, толуол", a: "растворители" },
-    { q: "этиленгликоль", a: "антифриз" },
-    { q: "глицерин", a: "косметика и медицина" },
-    { q: "уксусная кислота", a: "консервант" },
-    { q: "лимонная кислота", a: "пищевая промышленность" },
-    { q: "стеарат натрия", a: "моющие средства" },
-    { q: "анилин", a: "красители и лекарства" },
-    { q: "целлюлоза", a: "производство бумаги" }
+  // ======================= ПОЛНАЯ БАЗА ДАННЫХ =======================
+  // Объединяем все вещества из двух таблиц (с уникальными карточками)
+  const FULL_CARDS_DATA = [
+    // из первого файла (1000029349.jpg)
+    { q: "лимонная кислота", a: "пищевая промышленность, снятие накипи со стенок металлической посуды" },
+    { q: "соли жирных кислот (стеарат натрия)", a: "производство моющих средств" },
+    { q: "триолеин", a: "производство маргарина" },
+    { q: "капрон", a: "изготовление текстильных волокон" },
+    { q: "анилин", a: "производство красителей и лекарств" },
+    { q: "целлюлоза", a: "производство бумаги" },
+    
+    // из второго файла (1000029348.jpg) - подробно
+    { q: "метан, пропан, нефть, природный газ", a: "в качестве топлива (энергетика)" },
+    { q: "этилен", a: "производство этанола, получение пластмасс (ВМС)" },
+    { q: "ацетилен", a: "резка и сварка металлов, получение винилхлорида, получение пластмасс (ВМС)" },
+    { q: "пропилен, стирол, бутадиен", a: "получение пластмасс (ВМС)" },
+    { q: "полипропилен", a: "изготовление упаковочной пленки" },
+    { q: "изопрен, бутадиен", a: "получение каучука, резины" },
+    { q: "ацетон, метанол, хлороформ, тетрахлорид углерода, толуол, этилацетат", a: "в качестве растворителя" },
+    { q: "кумол", a: "сырье для производства фенола" },
+    { q: "этанол", a: "получение дивинила, медицина, пищевая промышленность, в качестве растворителя" },
+    { q: "формальдегид", a: "хранение биологических препаратов, получение пластмасс (ВМС)" },
+    { q: "этиленгликоль", a: "в составе незамерзающих жидкостей (антифризов)" },
+    { q: "глицерин", a: "лекарственные и косметические средства, производство динамита" },
+    { q: "тринитроглицерин", a: "в качестве лекарственного средства, взрывчатое вещество (динамит)" },
+    { q: "уксусная кислота", a: "производство волокон, пищевая промышленность (консервант)" }
   ];
 
-  // ---------- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ----------
-  let cards = [];            // рабочий массив (копия)
-  let currentIndex = 0;     // индекс текущей карточки
-  let isFlipped = false;    // перевернута ли сейчас карточка
-  let studyMode = 0;         // 0 = "вещество → применение" (q на обороте, a на лицевой??? разберем)
-  // Логика режима:
-  // mode = 0 -> лицевая сторона (front) = вещество/вопрос (q), обратная (back) = применение/ответ (a)
-  // mode = 1 -> лицевая сторона (front) = применение/ответ (a), обратная (back) = вещество/вопрос (q)
-  // Это удобно: "Сменить режим" меняет местами вопрос и ответ.
-  let viewedCardsCount = 0;  // сколько карточек просмотрено (когда перевернули и нажали следующую)
-  // Для статистики "Изучено" считаем количество карточек, которые были успешно "пройдены" (нажата след.)
-  // При перемешивании и смене режима сбрасываем счетчик изученных, чтобы не сбивать, но для нежности оставим
-  // однако сделаем что "изучено" растет только при переходе к следующей карточке (если карточка перевернута)
-  // Это интуитивно понятно: прошли карточку -> увеличиваем счетчик. При зацикливании или перемешивании счетчик изученных сбрасывается.
-  
-  // дополнительно храним массив пройденных флагов для каждой карточки (чтобы при перемешивании не сбрасывать прогресс)
-  let studiedFlags = [];     // true если карточка уже считалась изученной в текущей сессии (до перемешивания/сброса)
-  let totalCardsCount = 0;
+  // Глобальные переменные
+  let cards = [];              // рабочий массив карточек (будет копией)
+  let currentIndex = 0;
+  let isFlipped = false;
+  let studyMode = 0;          // 0 = вещество (q) на лицевой, применение (a) на обороте; 1 = наоборот
+  let studiedFlags = [];      // true если карточка уже засчитана как изученная
+  let viewedCardsCount = 0;   // количество уникальных изученных карточек
 
-  // вспомогательные функции обновления UI
+  // Вспомогательные функции UI
   function updateStatsUI() {
     document.getElementById("currentIndexDisplay").innerText = currentIndex + 1;
     document.getElementById("totalCardsCount").innerText = cards.length;
     document.getElementById("studiedCount").innerText = viewedCardsCount;
-    const modeText = (studyMode === 0) ? "🎓 Режим: Термин → Применение" : "🔄 Режим: Применение → Термин";
+    const modeText = (studyMode === 0) ? "🎓 Режим: Вещество → Применение" : "🔄 Режим: Применение → Вещество";
     document.getElementById("modeDisplay").innerHTML = modeText;
   }
 
-  // Загрузить текущую карточку на экран (с учетом режима)
+  // Загрузить текущую карточку (отобразить текст с учётом режима)
   function loadCard() {
     if (!cards.length || cards[currentIndex] === undefined) return;
     const frontEl = document.getElementById("frontText");
@@ -354,224 +330,209 @@
     let backContent = "";
     
     if (studyMode === 0) {
-      // Режим 0: Лицевая сторона - вещество/вопрос (q) ; Оборот - применение (a)
+      // Режим "Вещество → Применение"
       frontContent = cardData.q;
       backContent = cardData.a;
     } else {
-      // Режим 1: Лицевая сторона - применение (a) ; Оборот - вещество/вопрос (q)
+      // Режим "Применение → Вещество"
       frontContent = cardData.a;
       backContent = cardData.q;
     }
     
-    // добавляем эмодзи и стилизуем
+    // Небольшое форматирование для длинных текстов: оставляем как есть, но с эмодзи
     frontEl.innerHTML = `<span class="emoji-deco">💖</span> ${frontContent}`;
     backEl.innerHTML = `<span class="emoji-deco">💗</span> ${backContent}`;
     
-    // если карточка была перевернута в момент смены режима или индекса – нужно сбросить flip состояние визуально
-    // но важно сохранить внутренний флаг isFlipped в актуальном состоянии. 
-    if (isFlipped) {
-      // если вдруг карточка визуально осталась перевернутой, но мы сменили данные - лучше сбросить flip
-      // для избежания путаницы: принудительно показываем лицевую сторону после загрузки новой карточки
-      const innerDiv = document.getElementById("cardInner");
-      if (innerDiv.classList.contains("flipped")) {
-        innerDiv.classList.remove("flipped");
-      }
-      isFlipped = false;
-    } else {
-      // убеждаемся что класс снят
-      const innerDiv = document.getElementById("cardInner");
-      if (innerDiv.classList.contains("flipped")) {
-        innerDiv.classList.remove("flipped");
-      }
+    // Сбрасываем визуальный переворот при загрузке новой карточки (показываем лицевую сторону)
+    const innerDiv = document.getElementById("cardInner");
+    if (innerDiv.classList.contains("flipped")) {
+      innerDiv.classList.remove("flipped");
     }
+    isFlipped = false;
     updateStatsUI();
   }
   
-  // Перевернуть карточку (метод)
+  // Переворот карточки
   function flipCard() {
     const innerDiv = document.getElementById("cardInner");
-    // toggle класса переворота
     innerDiv.classList.toggle("flipped");
     isFlipped = !isFlipped;
   }
   
-  // Следующая карточка — только если текущая перевернута (как ты хотела)
+  // Следующая карточка — только если карточка перевёрнута (чтобы Кариночка сначала посмотрела ответ)
   function nextCard() {
     if (!isFlipped) {
-      // легкое уведомление без alert чтобы не раздражать (можно небольшой всплывающий тост, но оставим alert но милый)
       alert("💞 Кариночка, переверни карточку сначала! 💞\nНажми на карточку или кнопку 'Перевернуть'");
       return;
     }
     
-    // Отмечаем текущую карточку как "изученную", если еще не отмечена
+    // Отмечаем текущую карточку как изученную, если ещё не отмечена
     if (!studiedFlags[currentIndex]) {
       studiedFlags[currentIndex] = true;
       viewedCardsCount++;
     }
     
-    // Переходим к следующей карточке (циклично)
-    let next = currentIndex + 1;
-    if (next >= cards.length) {
-      // если дошли до конца — поздравляем и можно начать сначала
+    // Переход к следующей карточке (циклично)
+    let nextIndex = currentIndex + 1;
+    if (nextIndex >= cards.length) {
+      // Если прошли все карточки — приятное поздравление
       if (viewedCardsCount === cards.length) {
-        alert("💞 Умничка! Ты прошла все карточки ты мой котенок💞 Можешь повторить или перемешать");
+        alert("🎉✨ Умничка моя! Ты прошла все карточки! Ты настоящий химик 💖✨");
       } else {
-        alert("✨ Ты прошла круг! Продолжай учить дальше Кариночка ✨");
+        alert("🌸 Круг завершён! Продолжай учить, ты справишься! 🌸");
       }
-      next = 0;
+      nextIndex = 0;
     }
-    currentIndex = next;
+    currentIndex = nextIndex;
     
-    // сбрасываем состояние переворота для новой карточки
+    // Сбрасываем состояние переворота для новой карточки
     const innerDiv = document.getElementById("cardInner");
     if (innerDiv.classList.contains("flipped")) {
       innerDiv.classList.remove("flipped");
     }
     isFlipped = false;
     
-    // загружаем новую карточку
+    // Загружаем новую карточку
     loadCard();
   }
   
-  // Перемешать карточки (сохраняя прогресс изучения? Лучше сбросить изученные флаги, чтобы заново учить)
+  // Перемешать карточки (сохраняя прогресс изучения, но флаги перемешиваются вместе с карточками)
   function shuffleCards() {
-    // фишер-йетс
+    // Алгоритм Фишера-Йетса для перемешивания массива карточек и флагов одновременно
     for (let i = cards.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [cards[i], cards[j]] = [cards[j], cards[i]];
-      // также нужно перемешать studiedFlags соответственно
       [studiedFlags[i], studiedFlags[j]] = [studiedFlags[j], studiedFlags[i]];
     }
-    // сбросить текущий индекс на 0
+    // Сброс текущего индекса на 0
     currentIndex = 0;
-    // Обнуляем счетчик изученных? По логике, если перемешали, то порядок новый, но мы сохраняем флаги,
-    // но viewedCardsCount должен пересчитаться из studiedFlags
+    // Пересчитываем viewedCardsCount исходя из актуальных флагов
     viewedCardsCount = studiedFlags.filter(flag => flag === true).length;
     
-    // сбросить переворот
+    // Сбрасываем переворот
     const innerDiv = document.getElementById("cardInner");
     if (innerDiv.classList.contains("flipped")) {
       innerDiv.classList.remove("flipped");
     }
     isFlipped = false;
     loadCard();
-    // дополнительное сообщение
-    const msg = viewedCardsCount === cards.length ? "Все карточки уже были изучены, но порядок новый котик💞" : "Карточки перемешаны, продолжай учить пжшка! 🃏";
-    // alert(msg); — необязательно, но мило
-    // используем нежный алерт
-    alert(msg);
+    alert("🃏 Карточки перемешаны! Продолжай учить с новым порядком 🃏");
   }
   
-  // Сменить режим (термин<->применение)
+  // Сменить режим (Вещество ↔ Применение)
   function toggleMode() {
     studyMode = studyMode === 0 ? 1 : 0;
-    // при смене режима сбрасываем прогресс изученных? Логичнее оставить, но чтобы не путаться,
-    // оставим изученные флаги, но viewedCardsCount пересчитаем из флагов. Однако при смене режима 
-    // знание остается, поэтому не сбрасываем. Но чтобы не было путаницы - сбросим состояние переворота
+    // Сбрасываем состояние переворота, чтобы не было путаницы
     const innerDiv = document.getElementById("cardInner");
     if (innerDiv.classList.contains("flipped")) {
       innerDiv.classList.remove("flipped");
     }
     isFlipped = false;
-    // пересчитываем viewedCardsCount из studiedFlags (на случай если ранее что-то не совпадало)
+    // Пересчитываем изученные (прогресс остаётся, но режим меняет отображение)
     viewedCardsCount = studiedFlags.filter(flag => flag === true).length;
-    // обновляем текущую карточку
     loadCard();
-    // милый звуковой эффект (без звука, просто уведомление)
-    let modeMsg = (studyMode === 0) ? "🎓 Режим: Термин → Применение" : "🔄 Режим: Применение → Термин";
-    // можно показать всплывашку
-    const statsDiv = document.getElementById("statsPanel");
-    // легкий фидбек без алерта
-    const oldModeDisplay = document.getElementById("modeDisplay");
-    if(oldModeDisplay) oldModeDisplay.style.transform = "scale(1.02)";
-    setTimeout(() => { if(oldModeDisplay) oldModeDisplay.style.transform = ""; }, 200);
-    // но алерт не делаем, чтобы не надоедать
+    // Маленькая визуальная подсказка
+    const modeSpan = document.getElementById("modeDisplay");
+    if (modeSpan) {
+      modeSpan.style.transform = "scale(1.05)";
+      setTimeout(() => { if(modeSpan) modeSpan.style.transform = ""; }, 200);
+    }
   }
   
-  // Сбросить всё (полный ресет) но не нужно, но для чистоты добавим инициализацию
+  // Сброс прогресса (если захочешь начать всё заново, но без перезагрузки страницы)
+  function resetProgress() {
+    if (confirm("💭 Хочешь обнулить прогресс изучения? Все карточки снова будут \"неизученными\", но останутся те же вещества. 💭")) {
+      studiedFlags = new Array(cards.length).fill(false);
+      viewedCardsCount = 0;
+      currentIndex = 0;
+      const innerDiv = document.getElementById("cardInner");
+      if (innerDiv.classList.contains("flipped")) {
+        innerDiv.classList.remove("flipped");
+      }
+      isFlipped = false;
+      loadCard();
+      alert("✨ Прогресс сброшен! Можно учить заново ✨");
+    }
+  }
+  
+  // Инициализация / запуск приложения
   function initGame() {
-    // глубокое копирование оригинальных карточек
-    cards = originalCards.map(card => ({ ...card }));
-    totalCardsCount = cards.length;
-    // инициализация флагов изучения
+    // Создаём глубокую копию оригинальных данных
+    cards = FULL_CARDS_DATA.map(card => ({ ...card }));
     studiedFlags = new Array(cards.length).fill(false);
     viewedCardsCount = 0;
     currentIndex = 0;
     isFlipped = false;
-    studyMode = 0;  // по умолчанию термин -> применение
-    
-    // удаляем класс переворота если есть
-    const innerDiv = document.getElementById("cardInner");
-    if (innerDiv.classList.contains("flipped")) {
-      innerDiv.classList.remove("flipped");
-    }
+    studyMode = 0;   // по умолчанию вещество → применение
     loadCard();
   }
   
-  // привязываем клик на карточку для переворота (удобно)
-  function bindCardClick() {
-    const cardElement = document.getElementById("cardWrapper");
-    if (cardElement) {
-      // удаляем старый обработчик, чтобы не дублировать
-      const newCard = cardElement.cloneNode(true);
-      cardElement.parentNode.replaceChild(newCard, cardElement);
-      // заново привязываем id
-      newCard.id = "cardWrapper";
-      const newInner = newCard.querySelector("#cardInner");
-      if(!newInner) {
-        // fallback
-        location.reload();
-      }
-      // перепривязываем события
-      newCard.addEventListener("click", (e) => {
-        // чтобы случайно не сработало при клике на кнопки внутри карточки (но внутри карточки кнопок нет)
+  // Привязываем клик на карточку (дубль для надёжности)
+  function bindCardEvents() {
+    const wrapper = document.getElementById("cardWrapper");
+    if (wrapper) {
+      // Убираем старые обработчики, чтобы не было дублей
+      const newWrapper = wrapper.cloneNode(true);
+      wrapper.parentNode.replaceChild(newWrapper, wrapper);
+      newWrapper.id = "cardWrapper";
+      newWrapper.addEventListener("click", (e) => {
+        // Клик по карточке — переворот
         flipCard();
       });
-      // также обновляем глобальные ссылки
-      window.cardInnerRef = newInner;
-      document.getElementById("cardInner") // но уже новый элемент
+      // Обновляем глобальную ссылку на inner (на всякий случай)
+      const newInner = newWrapper.querySelector("#cardInner");
+      if (newInner) {
+        // ничего дополнительного не нужно
+      }
     } else {
+      // fallback
       document.getElementById("cardWrapper")?.addEventListener("click", () => flipCard());
     }
   }
   
-  // также при загрузке обновляем тоталы
-  window.onload = () => {
-    initGame();
-    // перепривязываем обработчик клика на карточку
-    const cardWrapper = document.getElementById("cardWrapper");
-    if (cardWrapper) {
-      // удаляем старые слушатели, ставим новый
-      cardWrapper.removeEventListener("click", flipCard);
-      cardWrapper.addEventListener("click", (e) => {
-        // предотвращаем двойной вызов если клик по внутренностям
-        e.stopPropagation();
-        flipCard();
-      });
+  // Дополнительно: добавить скрытую кнопку сброса (опционально, но можно через консоль или добавить в интерфейс)
+  // Добавим маленькую кнопку "Сбросить прогресс" внизу? Чтобы не загромождать, но сделаем красиво.
+  function addResetButton() {
+    const controlsDiv = document.querySelector(".controls");
+    if (controlsDiv && !document.getElementById("resetProgressBtn")) {
+      const resetBtn = document.createElement("button");
+      resetBtn.id = "resetProgressBtn";
+      resetBtn.innerHTML = "🔄 Сбросить прогресс";
+      resetBtn.style.background = "#ff8aa1";
+      resetBtn.style.boxShadow = "0 2px 6px rgba(255,80,120,0.3)";
+      resetBtn.onclick = () => resetProgress();
+      controlsDiv.appendChild(resetBtn);
     }
-    // также проверим что кнопки вызывают глобальные функции, они уже определены
-    // фикс: total отображается
-    updateStatsUI();
-    // дополнительно для красоты можно сделать плавное появление
-  };
+  }
   
-  // экспортируем функции в глобальный скоуп, чтобы кнопки работали
+  // Экспортируем функции в глобальный объект window, чтобы кнопки в HTML работали
   window.flipCard = flipCard;
   window.nextCard = nextCard;
   window.shuffleCards = shuffleCards;
   window.toggleMode = toggleMode;
+  window.resetProgress = resetProgress;
   
-  // Обработчик изменения размера не нужен, но оставим чистоту.
-  // Если карточка не переворачивается по клику из-за повторной инициализации - дублируем
-  setTimeout(() => {
-    const wrap = document.getElementById("cardWrapper");
-    if (wrap) {
-      // еще раз убедимся
-      wrap.addEventListener("click", (e) => {
-        flipCard();
-      });
-    }
-  }, 100);
+  // Запуск при полной загрузке страницы
+  window.onload = () => {
+    initGame();
+    bindCardEvents();
+    addResetButton();    // добавляем удобную кнопку сброса прогресса
+    // Небольшое приветствие
+    console.log("💖 Карточки для Кариночки загружены! Все вещества из табличек внутри 💖");
+    // показываем тост-приветствие (опционально)
+    setTimeout(() => {
+      if (cards.length) {
+        // можно не алертить, но оставим тихое уведомление в statsPanel на секунду
+        const statsDiv = document.getElementById("statsPanel");
+        if(statsDiv) {
+          const originalHTML = statsDiv.innerHTML;
+          statsDiv.style.transition = "0.2s";
+          statsDiv.style.background = "#ffeef4";
+          setTimeout(() => { if(statsDiv) statsDiv.style.background = ""; }, 500);
+        }
+      }
+    }, 100);
+  };
 </script>
 </body>
 </html>

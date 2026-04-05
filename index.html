@@ -48,7 +48,7 @@ button:hover { background: #ff1a66; }
   <button onclick="toggleMode()">Сменить режим 🔄</button>
 </div><p id="stats"></p><script>
 
-let mode = 0;
+let mode = 0; // 0 = сначала область применения, 1 = наоборот
 
 let cards = [
   {q: "метан, пропан, нефть, природный газ", a: "используются как топливо"},
@@ -76,8 +76,8 @@ function loadCard() {
 
   if (!cards[current]) return;
 
-  let front = mode === 0 ? cards[current].q : cards[current].a;
-  let back = mode === 0 ? cards[current].a : cards[current].q;
+  let front = mode === 0 ? cards[current].a : cards[current].q;
+  let back = mode === 0 ? cards[current].q : cards[current].a;
 
   frontEl.innerText = "💖 " + front;
   backEl.innerText = "💗 " + back;

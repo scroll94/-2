@@ -56,7 +56,6 @@ function flipCard() {
   card.classList.toggle("flipped");
   flipped = !flipped;
 }
-
 function nextCard() {
   if (!flipped) {
     alert("Сначала переверни карточку!");
@@ -66,4 +65,16 @@ function nextCard() {
   current++;
 
   if (current >= cards.length) {
-    document.getElementById("stats").innerText
+    document.getElementById("stats").innerText = "Ты просмотрел все карточки!";
+    current = 0;
+  }
+
+  flipped = false;
+  document.getElementById("cardInner").classList.remove("flipped");
+  loadCard();
+}
+
+loadCard();
+
+</script></body>
+</html>

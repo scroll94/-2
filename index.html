@@ -1,132 +1,577 @@
-<!DOCTYPE html><html lang="ru">
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Карточки для Кариночки 💖</title>
-<style>
-body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #ffe6f0, #fff);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-}h2 { color: #ff4d88; margin-top: 20px; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Карточки для любимой Кариночки 💖</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none; /* чуть приятнее на мобилках, но текст скопировать можно */
+    }
 
-.card { width: 320px; height: 200px; perspective: 1000px; margin-top: 40px; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #fff0f5 0%, #ffe4ed 100%);
+      font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, 'Roboto', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem 2rem;
+    }
 
-.inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s; }
+    /* контейнер всей витрины */
+    .app-container {
+      max-width: 600px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
 
-.flipped { transform: rotateY(180deg); }
+    /* заголовок с сердечками */
+    .cute-title {
+      font-size: 1.7rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ff3b6f, #ff8aa1);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 8px rgba(255, 75, 110, 0.15);
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.3px;
+      text-align: center;
+    }
 
-/* фикс бага с зеркалом */ .inner { transform: rotateY(0deg); }
+    .sub {
+      font-size: 0.9rem;
+      color: #ff7c9e;
+      background: #fff0f3;
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
 
-.front, .back { transform: rotateY(180deg); background: #ff2e75; color: #ffffff; transform: rotateY(180deg); }
+    /* карточка 3D */
+    .card-scene {
+      width: 100%;
+      max-width: 380px;
+      margin: 1rem auto;
+      perspective: 1200px;
+      cursor: pointer;
+    }
 
-.front { transform: rotateY(0deg); background: #ffffff; color: #ff2e75; }
+    .card {
+      width: 100%;
+      aspect-ratio: 16 / 10; /* 380x237 примерно -> приятные пропорции */
+      background: transparent;
+      position: relative;
+      transition: all 0.2s;
+    }
 
-.back { background: #ff4d88; color: white; transform: rotateY(180deg); }
+    .inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.65s cubic-bezier(0.23, 1, 0.32, 1);
+      transform-style: preserve-3d;
+      border-radius: 32px;
+      box-shadow: 0 20px 30px -12px rgba(255, 50, 100, 0.25), 0 8px 12px rgba(0,0,0,0.05);
+    }
 
-.controls { margin-top: 25px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .flipped {
+      transform: rotateY(180deg);
+    }
 
-button { padding: 10px 15px; border: none; border-radius: 12px; background: #ff4d88; color: white; cursor: pointer; font-size: 14px; }
+    /* общий стиль сторон */
+    .front, .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 1.2rem;
+      box-sizing: border-box;
+      font-weight: 600;
+      text-align: center;
+      word-break: break-word;
+      transition: all 0.2s ease;
+    }
 
-button:hover { background: #ff1a66; }
+    /* лицевая сторона (вопрос/термин) — розово-белая */
+    .front {
+      background: linear-gradient(135deg, #ffffff 0%, #fff5f8 100%);
+      color: #cc3366;
+      border: 2px solid #ffb7c7;
+      box-shadow: inset 0 1px 4px rgba(255,255,255,0.8), 0 4px 12px rgba(255,105,130,0.2);
+      transform: rotateY(0deg);
+    }
 
-#stats { margin-top: 20px; color: #ff4d88; }
+    /* обратная сторона (ответ/определение) — ярко-розовая */
+    .back {
+      background: linear-gradient(145deg, #ff2e6c, #ff4d8a);
+      color: #fff9fb;
+      transform: rotateY(180deg);
+      box-shadow: 0 8px 18px rgba(255, 50, 100, 0.3);
+      border: 1px solid rgba(255,255,200,0.4);
+    }
 
-</style>
+    /* текст на карточке */
+    .front-text, .back-text {
+      font-size: 1.2rem;
+      line-height: 1.45;
+      font-weight: 600;
+      max-width: 100%;
+    }
+
+    .front-text {
+      color: #d9366e;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .back-text {
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .emoji-deco {
+      font-size: 1.6rem;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+
+    /* кнопочки */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin: 1.5rem 0 0.8rem;
+    }
+
+    button {
+      background: #ff5982;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 60px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 4px 8px rgba(255, 60, 100, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(2px);
+      font-family: inherit;
+    }
+
+    button:active {
+      transform: scale(0.96);
+      background: #ff3a6f;
+      box-shadow: 0 2px 4px rgba(255, 60, 100, 0.4);
+    }
+
+    button:hover {
+      background: #ff3f72;
+      transform: translateY(-2px);
+    }
+
+    /* статус и прогресс */
+    .stats-panel {
+      margin-top: 20px;
+      background: rgba(255, 240, 245, 0.8);
+      backdrop-filter: blur(4px);
+      padding: 8px 18px;
+      border-radius: 60px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #c43b6b;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      border: 1px solid #ffbfcf;
+    }
+
+    .badge {
+      background: #ffdae4;
+      border-radius: 40px;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      color: #bb2e5c;
+    }
+
+    .mode-indicator {
+      background: #ffebf0;
+      border-radius: 30px;
+      padding: 5px 16px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #f23b73;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    footer {
+      margin-top: 24px;
+      font-size: 0.7rem;
+      color: #ff98b3;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .front-text, .back-text {
+        font-size: 1rem;
+      }
+      .cute-title {
+        font-size: 1.4rem;
+      }
+      button {
+        padding: 7px 15px;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
 </head>
-<body><h2>💖 Карточки для Кариночки 💖</h2><div class="card" id="card">
-  <div id="cardInner" class="inner">
-    <div class="front" id="frontText">Загрузка...</div>
-    <div class="back" id="backText"></div>
+<body>
+<div class="app-container">
+  <div class="cute-title">
+    💖 Карточки для любимой Кариночки 💖
   </div>
-</div><div class="controls">
-  <button onclick="flipCard()">Перевернуть 💗</button>
-  <button onclick="nextCard()">Следующая ➡️</button>
-  <button onclick="shuffleCards()">Перемешать 🔀</button>
-  <button onclick="toggleMode()">Сменить режим 🔄</button>
-</div><p id="stats"></p><script>
+  <div class="sub">
+    ✨ учим органику с любовью ✨
+  </div>
 
-let mode = 0; // 0 = сначала область применения, 1 = наоборот
+  <!-- 3D карточка -->
+  <div class="card-scene">
+    <div class="card" id="cardWrapper">
+      <div id="cardInner" class="inner">
+        <div class="front">
+          <span class="emoji-deco">🌸</span>
+          <div class="front-text" id="frontText">Загрузка...</div>
+        </div>
+        <div class="back">
+          <span class="emoji-deco">💕</span>
+          <div class="back-text" id="backText"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-let cards = [
-  {q: "метан, пропан, нефть, природный газ", a: "используются как топливо"},
-  {q: "этилен", a: "производство пластмасс"},
-  {q: "ацетилен", a: "сварка и резка металлов"},
-  {q: "пропилен", a: "полипропилен"},
-  {q: "изопрен, бутадиен", a: "каучук и резина"},
-  {q: "ацетон, метанол, толуол", a: "растворители"},
-  {q: "этиленгликоль", a: "антифриз"},
-  {q: "глицерин", a: "косметика и медицина"},
-  {q: "уксусная кислота", a: "консервант"},
-  {q: "лимонная кислота", a: "пищевая промышленность"},
-  {q: "стеарат натрия", a: "моющие средства"},
-  {q: "анилин", a: "красители и лекарства"},
-  {q: "целлюлоза", a: "производство бумаги"}
-];
+  <div class="controls">
+    <button onclick="flipCard()">✨ Перевернуть ✨</button>
+    <button onclick="nextCard()">➡️ Следующая</button>
+    <button onclick="shuffleCards()">🃏 Перемешать</button>
+    <button onclick="toggleMode()">🔄 Сменить режим</button>
+  </div>
 
-let current = 0;
-let flipped = false;
-let viewed = 0;
+  <div class="stats-panel" id="statsPanel">
+    <span>📚 Карточка <span id="currentIndexDisplay">1</span> / <span id="totalCardsCount">0</span></span>
+    <span>✅ Изучено: <span id="studiedCount">0</span></span>
+    <span id="modeDisplay" class="mode-indicator">🎓 Режим: Термин → Применение</span>
+  </div>
+  <footer>
+    💗 нажми на карточку или кнопку "перевернуть" 💗
+  </footer>
+</div>
 
-function loadCard() {
-  const frontEl = document.getElementById("frontText");
-  const backEl = document.getElementById("backText");
+<script>
+  // ---------- БАЗА ДАННЫХ (применение + вещество) ----------
+  const originalCards = [
+    { q: "метан, пропан, нефть, природный газ", a: "используются как топливо" },
+    { q: "этилен", a: "производство пластмасс" },
+    { q: "ацетилен", a: "сварка и резка металлов" },
+    { q: "пропилен", a: "полипропилен" },
+    { q: "изопрен, бутадиен", a: "каучук и резина" },
+    { q: "ацетон, метанол, толуол", a: "растворители" },
+    { q: "этиленгликоль", a: "антифриз" },
+    { q: "глицерин", a: "косметика и медицина" },
+    { q: "уксусная кислота", a: "консервант" },
+    { q: "лимонная кислота", a: "пищевая промышленность" },
+    { q: "стеарат натрия", a: "моющие средства" },
+    { q: "анилин", a: "красители и лекарства" },
+    { q: "целлюлоза", a: "производство бумаги" }
+  ];
 
-  if (!cards[current]) return;
+  // ---------- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ----------
+  let cards = [];            // рабочий массив (копия)
+  let currentIndex = 0;     // индекс текущей карточки
+  let isFlipped = false;    // перевернута ли сейчас карточка
+  let studyMode = 0;         // 0 = "вещество → применение" (q на обороте, a на лицевой??? разберем)
+  // Логика режима:
+  // mode = 0 -> лицевая сторона (front) = вещество/вопрос (q), обратная (back) = применение/ответ (a)
+  // mode = 1 -> лицевая сторона (front) = применение/ответ (a), обратная (back) = вещество/вопрос (q)
+  // Это удобно: "Сменить режим" меняет местами вопрос и ответ.
+  let viewedCardsCount = 0;  // сколько карточек просмотрено (когда перевернули и нажали следующую)
+  // Для статистики "Изучено" считаем количество карточек, которые были успешно "пройдены" (нажата след.)
+  // При перемешивании и смене режима сбрасываем счетчик изученных, чтобы не сбивать, но для нежности оставим
+  // однако сделаем что "изучено" растет только при переходе к следующей карточке (если карточка перевернута)
+  // Это интуитивно понятно: прошли карточку -> увеличиваем счетчик. При зацикливании или перемешивании счетчик изученных сбрасывается.
+  
+  // дополнительно храним массив пройденных флагов для каждой карточки (чтобы при перемешивании не сбрасывать прогресс)
+  let studiedFlags = [];     // true если карточка уже считалась изученной в текущей сессии (до перемешивания/сброса)
+  let totalCardsCount = 0;
 
-  let front = mode === 0 ? cards[current].a : cards[current].q;
-  let back = mode === 0 ? cards[current].q : cards[current].a;
-
-  frontEl.innerText = "💖 " + front;
-  backEl.innerText = "💗 " + back;
-}
-
-function flipCard() {
-  document.getElementById("cardInner").classList.toggle("flipped");
-  flipped = !flipped;
-}
-
-function nextCard() {
-  if (!flipped) {
-    alert("Сначала переверни карточку 💔");
-    return;
+  // вспомогательные функции обновления UI
+  function updateStatsUI() {
+    document.getElementById("currentIndexDisplay").innerText = currentIndex + 1;
+    document.getElementById("totalCardsCount").innerText = cards.length;
+    document.getElementById("studiedCount").innerText = viewedCardsCount;
+    const modeText = (studyMode === 0) ? "🎓 Режим: Термин → Применение" : "🔄 Режим: Применение → Термин";
+    document.getElementById("modeDisplay").innerHTML = modeText;
   }
 
-  viewed++;
-  current++;
-
-  if (current >= cards.length) {
-    document.getElementById("stats").innerText = "💖 Ты прошла все карточки!";
-    current = 0;
-    viewed = 0;
+  // Загрузить текущую карточку на экран (с учетом режима)
+  function loadCard() {
+    if (!cards.length || cards[currentIndex] === undefined) return;
+    const frontEl = document.getElementById("frontText");
+    const backEl = document.getElementById("backText");
+    const cardData = cards[currentIndex];
+    
+    let frontContent = "";
+    let backContent = "";
+    
+    if (studyMode === 0) {
+      // Режим 0: Лицевая сторона - вещество/вопрос (q) ; Оборот - применение (a)
+      frontContent = cardData.q;
+      backContent = cardData.a;
+    } else {
+      // Режим 1: Лицевая сторона - применение (a) ; Оборот - вещество/вопрос (q)
+      frontContent = cardData.a;
+      backContent = cardData.q;
+    }
+    
+    // добавляем эмодзи и стилизуем
+    frontEl.innerHTML = `<span class="emoji-deco">💖</span> ${frontContent}`;
+    backEl.innerHTML = `<span class="emoji-deco">💗</span> ${backContent}`;
+    
+    // если карточка была перевернута в момент смены режима или индекса – нужно сбросить flip состояние визуально
+    // но важно сохранить внутренний флаг isFlipped в актуальном состоянии. 
+    if (isFlipped) {
+      // если вдруг карточка визуально осталась перевернутой, но мы сменили данные - лучше сбросить flip
+      // для избежания путаницы: принудительно показываем лицевую сторону после загрузки новой карточки
+      const innerDiv = document.getElementById("cardInner");
+      if (innerDiv.classList.contains("flipped")) {
+        innerDiv.classList.remove("flipped");
+      }
+      isFlipped = false;
+    } else {
+      // убеждаемся что класс снят
+      const innerDiv = document.getElementById("cardInner");
+      if (innerDiv.classList.contains("flipped")) {
+        innerDiv.classList.remove("flipped");
+      }
+    }
+    updateStatsUI();
   }
-
-  flipped = false;
-  document.getElementById("cardInner").classList.remove("flipped");
-  loadCard();
-}
-
-function shuffleCards() {
-  cards.sort(() => Math.random() - 0.5);
-  current = 0;
-  loadCard();
-}
-
-function toggleMode() {
-  mode = mode === 0 ? 1 : 0;
-  current = 0;
-  loadCard();
-}
-
-// ВАЖНО: запуск после загрузки страницы
-window.onload = function() {
-  loadCard();
-  document.getElementById("card").addEventListener("click", flipCard);
-};
-
-</script></body>
+  
+  // Перевернуть карточку (метод)
+  function flipCard() {
+    const innerDiv = document.getElementById("cardInner");
+    // toggle класса переворота
+    innerDiv.classList.toggle("flipped");
+    isFlipped = !isFlipped;
+  }
+  
+  // Следующая карточка — только если текущая перевернута (как ты хотела)
+  function nextCard() {
+    if (!isFlipped) {
+      // легкое уведомление без alert чтобы не раздражать (можно небольшой всплывающий тост, но оставим alert но милый)
+      alert("💞 Кариночка, переверни карточку сначала! 💞\nНажми на карточку или кнопку 'Перевернуть'");
+      return;
+    }
+    
+    // Отмечаем текущую карточку как "изученную", если еще не отмечена
+    if (!studiedFlags[currentIndex]) {
+      studiedFlags[currentIndex] = true;
+      viewedCardsCount++;
+    }
+    
+    // Переходим к следующей карточке (циклично)
+    let next = currentIndex + 1;
+    if (next >= cards.length) {
+      // если дошли до конца — поздравляем и можно начать сначала
+      if (viewedCardsCount === cards.length) {
+        alert("💞 Умничка! Ты прошла все карточки ты мой котенок💞 Можешь повторить или перемешать");
+      } else {
+        alert("✨ Ты прошла круг! Продолжай учить дальше Кариночка ✨");
+      }
+      next = 0;
+    }
+    currentIndex = next;
+    
+    // сбрасываем состояние переворота для новой карточки
+    const innerDiv = document.getElementById("cardInner");
+    if (innerDiv.classList.contains("flipped")) {
+      innerDiv.classList.remove("flipped");
+    }
+    isFlipped = false;
+    
+    // загружаем новую карточку
+    loadCard();
+  }
+  
+  // Перемешать карточки (сохраняя прогресс изучения? Лучше сбросить изученные флаги, чтобы заново учить)
+  function shuffleCards() {
+    // фишер-йетс
+    for (let i = cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cards[i], cards[j]] = [cards[j], cards[i]];
+      // также нужно перемешать studiedFlags соответственно
+      [studiedFlags[i], studiedFlags[j]] = [studiedFlags[j], studiedFlags[i]];
+    }
+    // сбросить текущий индекс на 0
+    currentIndex = 0;
+    // Обнуляем счетчик изученных? По логике, если перемешали, то порядок новый, но мы сохраняем флаги,
+    // но viewedCardsCount должен пересчитаться из studiedFlags
+    viewedCardsCount = studiedFlags.filter(flag => flag === true).length;
+    
+    // сбросить переворот
+    const innerDiv = document.getElementById("cardInner");
+    if (innerDiv.classList.contains("flipped")) {
+      innerDiv.classList.remove("flipped");
+    }
+    isFlipped = false;
+    loadCard();
+    // дополнительное сообщение
+    const msg = viewedCardsCount === cards.length ? "Все карточки уже были изучены, но порядок новый котик💞" : "Карточки перемешаны, продолжай учить пжшка! 🃏";
+    // alert(msg); — необязательно, но мило
+    // используем нежный алерт
+    alert(msg);
+  }
+  
+  // Сменить режим (термин<->применение)
+  function toggleMode() {
+    studyMode = studyMode === 0 ? 1 : 0;
+    // при смене режима сбрасываем прогресс изученных? Логичнее оставить, но чтобы не путаться,
+    // оставим изученные флаги, но viewedCardsCount пересчитаем из флагов. Однако при смене режима 
+    // знание остается, поэтому не сбрасываем. Но чтобы не было путаницы - сбросим состояние переворота
+    const innerDiv = document.getElementById("cardInner");
+    if (innerDiv.classList.contains("flipped")) {
+      innerDiv.classList.remove("flipped");
+    }
+    isFlipped = false;
+    // пересчитываем viewedCardsCount из studiedFlags (на случай если ранее что-то не совпадало)
+    viewedCardsCount = studiedFlags.filter(flag => flag === true).length;
+    // обновляем текущую карточку
+    loadCard();
+    // милый звуковой эффект (без звука, просто уведомление)
+    let modeMsg = (studyMode === 0) ? "🎓 Режим: Термин → Применение" : "🔄 Режим: Применение → Термин";
+    // можно показать всплывашку
+    const statsDiv = document.getElementById("statsPanel");
+    // легкий фидбек без алерта
+    const oldModeDisplay = document.getElementById("modeDisplay");
+    if(oldModeDisplay) oldModeDisplay.style.transform = "scale(1.02)";
+    setTimeout(() => { if(oldModeDisplay) oldModeDisplay.style.transform = ""; }, 200);
+    // но алерт не делаем, чтобы не надоедать
+  }
+  
+  // Сбросить всё (полный ресет) но не нужно, но для чистоты добавим инициализацию
+  function initGame() {
+    // глубокое копирование оригинальных карточек
+    cards = originalCards.map(card => ({ ...card }));
+    totalCardsCount = cards.length;
+    // инициализация флагов изучения
+    studiedFlags = new Array(cards.length).fill(false);
+    viewedCardsCount = 0;
+    currentIndex = 0;
+    isFlipped = false;
+    studyMode = 0;  // по умолчанию термин -> применение
+    
+    // удаляем класс переворота если есть
+    const innerDiv = document.getElementById("cardInner");
+    if (innerDiv.classList.contains("flipped")) {
+      innerDiv.classList.remove("flipped");
+    }
+    loadCard();
+  }
+  
+  // привязываем клик на карточку для переворота (удобно)
+  function bindCardClick() {
+    const cardElement = document.getElementById("cardWrapper");
+    if (cardElement) {
+      // удаляем старый обработчик, чтобы не дублировать
+      const newCard = cardElement.cloneNode(true);
+      cardElement.parentNode.replaceChild(newCard, cardElement);
+      // заново привязываем id
+      newCard.id = "cardWrapper";
+      const newInner = newCard.querySelector("#cardInner");
+      if(!newInner) {
+        // fallback
+        location.reload();
+      }
+      // перепривязываем события
+      newCard.addEventListener("click", (e) => {
+        // чтобы случайно не сработало при клике на кнопки внутри карточки (но внутри карточки кнопок нет)
+        flipCard();
+      });
+      // также обновляем глобальные ссылки
+      window.cardInnerRef = newInner;
+      document.getElementById("cardInner") // но уже новый элемент
+    } else {
+      document.getElementById("cardWrapper")?.addEventListener("click", () => flipCard());
+    }
+  }
+  
+  // также при загрузке обновляем тоталы
+  window.onload = () => {
+    initGame();
+    // перепривязываем обработчик клика на карточку
+    const cardWrapper = document.getElementById("cardWrapper");
+    if (cardWrapper) {
+      // удаляем старые слушатели, ставим новый
+      cardWrapper.removeEventListener("click", flipCard);
+      cardWrapper.addEventListener("click", (e) => {
+        // предотвращаем двойной вызов если клик по внутренностям
+        e.stopPropagation();
+        flipCard();
+      });
+    }
+    // также проверим что кнопки вызывают глобальные функции, они уже определены
+    // фикс: total отображается
+    updateStatsUI();
+    // дополнительно для красоты можно сделать плавное появление
+  };
+  
+  // экспортируем функции в глобальный скоуп, чтобы кнопки работали
+  window.flipCard = flipCard;
+  window.nextCard = nextCard;
+  window.shuffleCards = shuffleCards;
+  window.toggleMode = toggleMode;
+  
+  // Обработчик изменения размера не нужен, но оставим чистоту.
+  // Если карточка не переворачивается по клику из-за повторной инициализации - дублируем
+  setTimeout(() => {
+    const wrap = document.getElementById("cardWrapper");
+    if (wrap) {
+      // еще раз убедимся
+      wrap.addEventListener("click", (e) => {
+        flipCard();
+      });
+    }
+  }, 100);
+</script>
+</body>
 </html>

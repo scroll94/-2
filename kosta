@@ -1,0 +1,266 @@
+"""
+Тыква-светильник (jack-o'-lantern) для Roblox Studio.
+Blender -> Scripting -> New -> вставить -> Run Script (Alt+P). Blender 4.x.
+
+Что получится (3 отдельных меша -- в Studio это три MeshPart, каждой можно задать цвет/материал):
+  Pumpkin_Body  -- оранжевая полая тыква с рёбрами и вырезанным лицом (глаза, нос, зубастый рот)
+  Pumpkin_Glow  -- светящаяся "начинка", видна через вырезы
+  Pumpkin_Stem  -- изогнутый хвостик
+
+Под Roblox:
+  - меньше 20 000 треугольников на меш (лимит импорта), у скрипта около 8 000 на тело;
+  - у каждого меша один материал, всё в начале координат, трансформации применены;
+  - в конце экспорт FBX: ~/3d_projects/pumpkin.fbx (выключается EXPORT = False).
+"""
+import bpy
+import math
+import os
+from mathutils import Vector
+
+# ---------------- параметры ----------------
+R = 1.5               # радиус тыквы в единицах Blender (диаметр 3)
+ZS = 0.78             # приплюснутость по высоте
+RIBS = 10             # количество рёбер-долек
+RIB_DEPTH = 0.09      # глубина рёбер
+SHELL_T = 0.07        # толщина стенки (полая тыква)
+SEG, RINGS = 60, 30   # детализация тела
+ROBLOX_ORIENT = True  # повернуть лицом в сторону "Front" Roblox (-Z после конвертации осей)
+EXPORT = True         # сохранить FBX для Roblox Studio
+
+# ---------------- очистка сцены ----------------
+bpy.ops.object.select_all(action='SELECT')
+bpy.ops.object.delete()
+
+
+# ---------------- материалы ----------------
+def make_mat(name, rgb, rough=0.5, emit=0.0):
+    m = bpy.data.materials.new(name)
+    m.diffuse_color = (rgb[0], rgb[1], rgb[2], 1)
+    m.use_nodes = True
+    b = m.node_tree.nodes.get("Principled BSDF")
+    if b:
+        b.inputs["Base Color"].default_value = (rgb[0], rgb[1], rgb[2], 1)
+        b.inputs["Roughness"].default_value = rough
+        if emit > 0:
+            try:
+                b.inputs["Emission Color"].default_value = (rgb[0], rgb[1], rgb[2], 1)
+                b.inputs["Emission Strength"].default_value = emit
+            except KeyError:
+                pass
+    return m
+
+
+mat_body = make_mat("Pumpkin_Orange", (0.90, 0.30, 0.03), 0.45)
+mat_stem = make_mat("Pumpkin_Stem", (0.25, 0.30, 0.08), 0.7)
+mat_glow = make_mat("Pumpkin_Glow", (1.0, 0.75, 0.15), 0.3, emit=4.0)
+
+
+# ---------------- вспомогательные функции ----------------
+def obj_from_mesh(name, verts, faces, material):
+    me = bpy.data.meshes.new(name + "_mesh")
+    me.from_pydata(verts, [], faces)
+    me.update()
+    o = bpy.data.objects.new(name, me)
+    bpy.context.collection.objects.link(o)
+    if material:
+        me.materials.append(material)
+    return o
+
+
+def fix_normals(o):
+    """Все нормали наружу (замкнутые меши)."""
+    import bmesh
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(o.data)
+    bm.free()
+    o.data.update()
+
+
+def set_active(o):
+    bpy.ops.object.select_all(action='DESELECT')
+    o.select_set(True)
+    bpy.context.view_layer.objects.active = o
+
+
+def smooth(o):
+    set_active(o)
+    try:
+        bpy.ops.object.shade_smooth_by_angle(angle=math.radians(45))   # Blender 4.1+
+    except Exception:
+        bpy.ops.object.shade_smooth()
+
+
+def apply_modifier(o, mod):
+    set_active(o)
+    bpy.ops.object.modifier_apply(modifier=mod.name)
+
+
+def sphere_grid(rings, seg, radial, zfun):
+    """UV-сфера по формулам: radial(theta, phi) -- радиус, zfun(theta) -- высота."""
+    verts = [(0, 0, zfun(0.0)), (0, 0, zfun(math.pi))]       # 0 -- верхний полюс, 1 -- нижний
+    for r in range(1, rings):
+        th = math.pi * r / rings
+        for i in range(seg):
+            ph = 2 * math.pi * i / seg
+            rad = radial(th, ph)
+            verts.append((rad * math.sin(th) * math.cos(ph), rad * math.sin(th) * math.sin(ph), zfun(th)))
+    faces = []
+    base = lambda r, i: 2 + (r - 1) * seg + (i % seg)
+    for i in range(seg):
+        faces.append((0, base(1, i + 1), base(1, i)))                      # веер у верхнего полюса
+        faces.append((1, base(rings - 1, i), base(rings - 1, i + 1)))      # веер у нижнего
+    for r in range(1, rings - 1):
+        for i in range(seg):
+            faces.append((base(r, i), base(r, i + 1), base(r + 1, i + 1), base(r + 1, i)))
+    return verts, faces
+
+
+# =====================================================================
+# 1. ТЕЛО: сфера с долями и вмятинами сверху/снизу
+# =====================================================================
+def radial_body(th, ph):
+    # лицо смотрит в -Y: фаза рёбер задана так, чтобы спереди была "долька"
+    rib = 1 + RIB_DEPTH * math.cos(RIBS * (ph + math.pi / 2)) * math.sin(th) ** 1.5
+    return R * rib
+
+
+def z_body(th):
+    z = ZS * R * math.cos(th)
+    z -= 0.12 * R * math.exp(-(th / 0.30) ** 2)                       # вмятина вокруг хвостика
+    z += 0.07 * R * math.exp(-((math.pi - th) / 0.30) ** 2)           # вмятина снизу
+    return z
+
+
+bv, bf = sphere_grid(RINGS, SEG, radial_body, z_body)
+body = obj_from_mesh("Pumpkin_Body", bv, bf, mat_body)
+fix_normals(body)
+
+# полая тыква: толщина стенки внутрь
+sol = body.modifiers.new("Shell", 'SOLIDIFY')
+sol.thickness = SHELL_T
+sol.offset = -1
+apply_modifier(body, sol)
+
+# =====================================================================
+# 2. ВЫРЕЗЫ ЛИЦА: глаза, нос, рот (многоугольники из картинки -> призмы -> Boolean)
+# =====================================================================
+left_eye = [(-0.39, 0.46), (-0.09, 0.04), (-0.31, -0.16)]
+right_eye = [(-x, y) for x, y in left_eye]
+nose = [(0.0, 0.02), (-0.13, -0.20), (0.13, -0.20)]
+
+
+def mouth_polygon():
+    """Улыбка со встречными зубами сверху и снизу."""
+    xs = [-0.85 + 0.17 * k for k in range(11)]
+    upper, lower = [], []
+    for k, x in enumerate(xs):
+        yc = -0.45 + 0.70 * x * x                        # изгиб улыбки
+        tp = 1 - 0.70 * (abs(x) / 0.85) ** 3             # сужение к краям
+        up = (0.20 if k % 2 == 0 else 0.07) * tp
+        lo = (0.20 if k % 2 == 1 else 0.07) * tp
+        upper.append((x, yc + up))
+        lower.append((x, yc - lo))
+    return upper + lower[::-1]
+
+
+def prism(name, poly2d, y0, y1):
+    """Многоугольник (u, v) в плоскости XZ, вытянутый вдоль Y от y0 до y1."""
+    n = len(poly2d)
+    verts = [(u * R, y0, v * R) for u, v in poly2d] + [(u * R, y1, v * R) for u, v in poly2d]
+    faces = [tuple(range(n)), tuple(range(2 * n - 1, n - 1, -1))]
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append((i, j, n + j, n + i))
+    o = obj_from_mesh(name, verts, faces, None)
+    fix_normals(o)
+    return o
+
+
+Y0, Y1 = -1.8 * R, -0.25 * R          # проходит насквозь только переднюю стенку
+for nm, poly in (("Cut_EyeL", left_eye), ("Cut_EyeR", right_eye),
+                 ("Cut_Nose", nose), ("Cut_Mouth", mouth_polygon())):
+    cutter = prism(nm, poly, Y0, Y1)
+    bm_mod = body.modifiers.new("Carve", 'BOOLEAN')
+    bm_mod.operation = 'DIFFERENCE'
+    bm_mod.solver = 'EXACT'
+    bm_mod.object = cutter
+    apply_modifier(body, bm_mod)
+    bpy.data.objects.remove(cutter, do_unlink=True)
+
+smooth(body)
+
+# =====================================================================
+# 3. СВЕТЯЩАЯСЯ НАЧИНКА (видна через вырезы)
+# =====================================================================
+gv, gf = sphere_grid(16, 24, lambda th, ph: 0.84 * R, lambda th: 0.84 * ZS * R * math.cos(th))
+glow = obj_from_mesh("Pumpkin_Glow", gv, gf, mat_glow)
+fix_normals(glow)
+smooth(glow)
+
+# =====================================================================
+# 4. ХВОСТИК: изогнутая труба с утолщением у основания
+# =====================================================================
+z_top = z_body(0.0) - 0.03
+STEPS, SIDES = 9, 12
+path = []
+for k in range(STEPS + 1):
+    t = k / STEPS
+    path.append(Vector((0.40 * R * t * t, 0.0, z_top + 0.50 * R * t)))      # изгиб в сторону +X
+radii = [(0.17 - 0.07 * (k / STEPS)) * R * (1.0 + 0.5 * math.exp(-k * 1.4)) for k in range(STEPS + 1)]
+radii[-1] *= 1.15                                                           # срез чуть шире
+
+sv, sf = [], []
+for k, (p, r) in enumerate(zip(path, radii)):
+    prev_p = path[max(k - 1, 0)]
+    next_p = path[min(k + 1, STEPS)]
+    T = (next_p - prev_p).normalized()
+    N = T.cross(Vector((0, 1, 0))).normalized()
+    B = T.cross(N).normalized()
+    for i in range(SIDES):
+        a = 2 * math.pi * i / SIDES
+        q = p + N * (r * math.cos(a)) + B * (r * math.sin(a))
+        sv.append((q.x, q.y, q.z))
+for k in range(STEPS):
+    for i in range(SIDES):
+        j = (i + 1) % SIDES
+        sf.append((k * SIDES + i, k * SIDES + j, (k + 1) * SIDES + j, (k + 1) * SIDES + i))
+sf.append(tuple(range(SIDES - 1, -1, -1)))                                  # нижняя заглушка
+sf.append(tuple(range(STEPS * SIDES, STEPS * SIDES + SIDES)))               # верхняя заглушка
+stem = obj_from_mesh("Pumpkin_Stem", sv, sf, mat_stem)
+fix_normals(stem)
+smooth(stem)
+
+# =====================================================================
+# 5. Подготовка под Roblox: ориентация, применение трансформаций, экспорт
+# =====================================================================
+parts = [body, glow, stem]
+bpy.ops.object.select_all(action='DESELECT')
+for o in parts:
+    o.select_set(True)
+bpy.context.view_layer.objects.active = body
+
+if ROBLOX_ORIENT:
+    # Blender -Y -> после конвертации осей FBX смотрит назад; поворачиваем лицом к Roblox "Front"
+    for o in parts:
+        o.rotation_euler = (0, 0, math.pi)
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+
+tris = sum(len(o.data.polygons) for o in parts)
+print("Полигонов (всего по 3 мешам): %d. Лимит Roblox -- 20000 треугольников на один меш." % tris)
+
+for area in bpy.context.screen.areas:
+    if area.type == 'VIEW_3D':
+        area.spaces[0].shading.type = 'MATERIAL'
+
+if EXPORT:
+    try:
+        folder = os.path.join(os.path.expanduser("~"), "3d_projects")
+        os.makedirs(folder, exist_ok=True)
+        path_fbx = os.path.join(folder, "pumpkin.fbx")
+        bpy.ops.export_scene.fbx(filepath=path_fbx, use_selection=True,
+                                 object_types={'MESH'}, bake_anim=False)
+        print("FBX сохранён:", path_fbx)
+    except Exception as e:
+        print("Экспорт FBX не удался:", e)

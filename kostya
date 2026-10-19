@@ -1,19 +1,19 @@
 """
-Человечек с рисунка для Blender (2.81+ / 3.x / 4.x) — версия 2.
+Человечек с рисунка для Blender (2.81+ / 3.x / 4.x) — версия 3.
 
-Что исправлено относительно первой версии:
-  * руки теперь растут из плеч (есть широкая «плечевая» часть, руки с ней перекрываются),
-    а кисти насажены на концы рук;
-  * добавлен таз, ноги плавно вырастают из него и сужаются к щиколоткам;
-  * ступни перекрывают низ ног;
-  * все части тела сливаются в ОДИН цельный меш через Voxel Remesh,
-    так что никаких «висюлек» не остаётся;
-  * глаза и рот остаются отдельными объектами (чёрный материал) и привязаны к телу.
+Что нового:
+  * белое тело + чёрная обводка (метод «inverted hull»: оболочка из модификатора
+    Solidify с перевёрнутыми нормалями и чёрным материалом) — работает и в Eevee, и в Cycles;
+  * торс, плечи и таз теперь одна плавная поверхность вращения: нет выпирающих
+    «ключиц» и груди, а бёдра переходят в ноги без «трусов»;
+  * тело по-прежнему одним цельным мешем (Voxel Remesh), руки и ноги не отваливаются.
 
 Запуск: Blender -> вкладка Scripting -> New -> вставить код -> Run Script (Alt+P).
 Лицо смотрит в сторону -Y (вид спереди: Numpad 1).
+Чтобы белый был именно белым, скрипт ставит Color Management -> View Transform = Standard.
 """
 import math
+import bmesh
 import bpy
 from mathutils import Vector
 
@@ -22,8 +22,9 @@ HEIGHT_M = 1.8             # высота модели, м
 IMG_TOP, IMG_BOTTOM = 118, 575   # верх головы / низ ступней на рисунке (px)
 CX = 245                   # ось симметрии (px)
 CLEAR_SCENE = False        # True -> очистить сцену перед созданием
-MERGE_BODY = True          # True -> слить тело в один цельный меш
 VOXEL_SIZE = 0.006         # детализация слияния, м (меньше = подробнее, но тяжелее)
+OUTLINE_M = 0.009          # толщина чёрной обводки, м
+SET_STANDARD_VIEW = True   # включить View Transform = Standard (чистый белый цвет)
 
 S = HEIGHT_M / (IMG_BOTTOM - IMG_TOP)   # метров на пиксель
 
@@ -41,14 +42,41 @@ def L(px):
 
 
 # ---------------------------------------------------------------- МАТЕРИАЛЫ
-def make_material(name, color, roughness=0.6):
+def make_flat_material(name, color):
+    """Плоский цвет без зависимости от освещения (как на рисунке)."""
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
-    bsdf = mat.node_tree.nodes.get("Principled BSDF")
-    if bsdf:
-        bsdf.inputs["Base Color"].default_value = color
-        bsdf.inputs["Roughness"].default_value = roughness
+    nt = mat.node_tree
+    nt.nodes.clear()
+    emi = nt.nodes.new("ShaderNodeEmission")
+    emi.inputs["Color"].default_value = color
+    emi.inputs["Strength"].default_value = 1.0
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(emi.outputs["Emission"], out.inputs["Surface"])
     mat.diffuse_color = color
+    return mat
+
+
+def make_outline_material(name):
+    """Чёрный материал для оболочки-обводки.
+    Eevee: backface culling скрывает ближнюю часть оболочки.
+    Cycles: то же самое делает Backfacing -> Transparent."""
+    mat = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    mat.use_backface_culling = True
+    mat.diffuse_color = (0, 0, 0, 1)
+    nt = mat.node_tree
+    nt.nodes.clear()
+    geo = nt.nodes.new("ShaderNodeNewGeometry")
+    black = nt.nodes.new("ShaderNodeEmission")
+    black.inputs["Color"].default_value = (0, 0, 0, 1)
+    transp = nt.nodes.new("ShaderNodeBsdfTransparent")
+    mix = nt.nodes.new("ShaderNodeMixShader")
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(geo.outputs["Backfacing"], mix.inputs["Fac"])
+    nt.links.new(black.outputs["Emission"], mix.inputs[1])
+    nt.links.new(transp.outputs["BSDF"], mix.inputs[2])
+    nt.links.new(mix.outputs["Shader"], out.inputs["Surface"])
     return mat
 
 
@@ -76,7 +104,7 @@ def ellipsoid(name, cx, cy, rx, rz, ry, mat, y=0.0, rot_z=0.0):
 
 
 def vert_cone(name, cx, y_top, y_bot, r_top, r_bot, mat, ry_factor=1.0):
-    """Вертикальный усечённый конус (радиусы в px). ry_factor сплющивает по глубине."""
+    """Вертикальный усечённый конус (радиусы в px)."""
     bpy.ops.mesh.primitive_cone_add(
         vertices=48,
         radius1=L(r_bot), radius2=L(r_top), depth=L(y_bot - y_top),
@@ -87,7 +115,7 @@ def vert_cone(name, cx, y_top, y_bot, r_top, r_bot, mat, ry_factor=1.0):
 
 
 def limb(name, p1, p2, r1, r2, mat):
-    """Наклонная округлая «трубка» от точки p1 до p2 (точки — (x, y) на рисунке)."""
+    """Наклонная округлая «трубка» от p1 до p2 (точки — (x, y) на рисунке)."""
     a = Vector((X(p1[0]), 0.0, Z(p1[1])))
     b = Vector((X(p2[0]), 0.0, Z(p2[1])))
     d = b - a
@@ -95,9 +123,58 @@ def limb(name, p1, p2, r1, r2, mat):
         vertices=32, radius1=L(r1), radius2=L(r2), depth=d.length,
         location=(a + b) / 2)
     obj = bpy.context.active_object
-    # локальная +Z смотрит от p1 к p2 (радиус r1 у p1, r2 у p2)
     obj.rotation_euler = d.to_track_quat("Z", "Y").to_euler()
     return finish(obj, name, mat)
+
+
+def catmull(p0, p1, p2, p3, t):
+    t2, t3 = t * t, t * t * t
+    return 0.5 * ((2 * p1) + (-p0 + p2) * t
+                  + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2
+                  + (-p0 + 3 * p1 - 3 * p2 + p3) * t3)
+
+
+def lathe_body(name, profile, mat, cx=CX, sides=48, steps=8):
+    """Плавная поверхность вращения (эллиптическое сечение).
+    profile — список (y_px, полуширина_px, полуглубина_px) сверху вниз."""
+    pts = [Vector(p) for p in profile]
+    ext = [pts[0]] + pts + [pts[-1]]
+    samples = []
+    for i in range(1, len(ext) - 2):
+        for s in range(steps):
+            t = s / steps
+            samples.append(tuple(
+                catmull(ext[i - 1][k], ext[i][k], ext[i + 1][k], ext[i + 2][k], t)
+                for k in range(3)))
+    samples.append(tuple(pts[-1]))
+
+    bm = bmesh.new()
+    rings = []
+    for (py, rx, ry) in samples:
+        ring = []
+        for k in range(sides):
+            a = 2 * math.pi * k / sides
+            ring.append(bm.verts.new((X(cx) + L(rx) * math.cos(a),
+                                      L(ry) * math.sin(a),
+                                      Z(py))))
+        rings.append(ring)
+    for r in range(len(rings) - 1):
+        for k in range(sides):
+            k2 = (k + 1) % sides
+            bm.faces.new((rings[r][k], rings[r][k2], rings[r + 1][k2], rings[r + 1][k]))
+    bm.faces.new(rings[0])
+    bm.faces.new(rings[-1][::-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    for poly in me.polygons:
+        poly.use_smooth = True
+    obj = bpy.data.objects.new(name, me)
+    bpy.context.collection.objects.link(obj)
+    obj.data.materials.append(mat)
+    return obj
 
 
 def head_surface_y(cx, cy, rx, rz, ry, px, py):
@@ -106,8 +183,8 @@ def head_surface_y(cx, cy, rx, rz, ry, px, py):
     return -L(ry) * math.sqrt(max(k, 0.0))
 
 
-def merge_into_one(parts, name, mat):
-    """Join + Voxel Remesh: перекрывающиеся части превращаются в один цельный меш."""
+def merge_into_one(parts, name, white, outline):
+    """Join + Voxel Remesh -> один цельный меш, затем чёрная обводка (Solidify)."""
     bpy.ops.object.select_all(action="DESELECT")
     for p in parts:
         p.select_set(True)
@@ -119,13 +196,20 @@ def merge_into_one(parts, name, mat):
     mod = body.modifiers.new("Merge", "REMESH")
     mod.mode = "VOXEL"
     mod.voxel_size = VOXEL_SIZE
-    mod.adaptivity = 0.0
     bpy.ops.object.modifier_apply(modifier=mod.name)
-
-    # после remesh слоты материалов могут быть сброшены — задаём заново
-    body.data.materials.clear()
-    body.data.materials.append(mat)
     bpy.ops.object.shade_smooth()
+
+    # слот 0 — белое тело, слот 1 — чёрная обводка
+    body.data.materials.clear()
+    body.data.materials.append(white)
+    body.data.materials.append(outline)
+
+    sol = body.modifiers.new("Outline", "SOLIDIFY")
+    sol.thickness = OUTLINE_M
+    sol.offset = 1.0              # оболочка наружу
+    sol.use_flip_normals = True   # нормали внутрь -> видна только «задняя» сторона
+    sol.use_even_offset = True
+    sol.material_offset = 1       # оболочка берёт слот 1 (чёрный)
     return body
 
 
@@ -135,65 +219,76 @@ def build():
         bpy.ops.object.select_all(action="SELECT")
         bpy.ops.object.delete()
 
-    skin = make_material("Skin", (0.78, 0.80, 0.82, 1.0), 0.7)
-    dark = make_material("Dark", (0.02, 0.02, 0.02, 1.0), 0.4)
+    if SET_STANDARD_VIEW:
+        try:
+            bpy.context.scene.view_settings.view_transform = "Standard"
+        except Exception:
+            pass
 
-    body_parts = []
+    white = make_flat_material("White", (1.0, 1.0, 1.0, 1.0))
+    black = make_flat_material("Black", (0.0, 0.0, 0.0, 1.0))
+    outline = make_outline_material("Outline")
+
+    parts = []
 
     # --- Голова ---
     HX, HY, HRX, HRZ, HRY = 245, 173, 41, 55, 40
-    body_parts.append(ellipsoid("Head", HX, HY, HRX, HRZ, HRY, skin))
+    parts.append(ellipsoid("Head", HX, HY, HRX, HRZ, HRY, white))
 
-    # --- Шея (входит и в голову, и в плечи) ---
-    body_parts.append(vert_cone("Neck", 245, 215, 262, 9, 10, skin, ry_factor=0.9))
+    # --- Шея ---
+    parts.append(vert_cone("Neck", 245, 215, 262, 9, 10, white, ry_factor=0.9))
 
-    # --- Плечи: широкий овал, из которого растут руки ---
-    body_parts.append(ellipsoid("Shoulders", 245, 264, 37, 22, 19, skin))
+    # --- Торс + плечи + таз одной плавной поверхностью ---
+    # (y, полуширина, полуглубина) сверху вниз: скошенные плечи, узкая талия,
+    # бёдра не шире верха ног — поэтому нет выпирающей груди и «трусов».
+    torso_profile = [
+        (244, 9, 8),      # основание шеи
+        (250, 14, 11),
+        (256, 21, 14),    # скат плеча
+        (264, 28, 17),
+        (278, 29.5, 18),  # самое широкое место (плечи/грудь)
+        (300, 28.5, 17.5),
+        (335, 26, 16),
+        (370, 24.5, 15),  # талия
+        (398, 25.5, 15),  # бёдра = ширина верха ног
+        (410, 23, 13),
+        (419, 14, 9),
+        (425, 0.5, 0.5),
+    ]
+    parts.append(lathe_body("Torso", torso_profile, white))
 
-    # --- Торс: сужается к талии ---
-    body_parts.append(vert_cone("Torso", 245, 262, 405, 30, 25, skin, ry_factor=0.62))
+    # --- Руки: растут из края плеча, чуть расходятся к кистям ---
+    for side, sx, hx in (("L", 217, 207), ("R", 273, 283)):
+        parts.append(limb(f"Arm_{side}", (sx, 268), (hx, 404), 8, 5.5, white))
+        parts.append(ellipsoid(f"Hand_{side}", hx, 413, 12, 17, 10, white))
 
-    # --- Таз: перекрывает верх обеих ног ---
-    body_parts.append(ellipsoid("Pelvis", 245, 402, 30, 20, 17, skin))
+    # --- Ноги: наружный край верха ноги = край талии, без ступеньки ---
+    for side, lx in (("L", 232.5), ("R", 257.5)):
+        parts.append(vert_cone(f"Leg_{side}", lx, 392, 558, 12.5, 9, white))
 
-    # --- Руки: от плеча чуть наружу к кисти, кисти насажены на концы ---
-    for side, sx, hx in (("L", 216, 207), ("R", 274, 283)):
-        body_parts.append(limb(f"Arm_{side}", (sx, 262), (hx, 404), 8, 5.5, skin))
-        body_parts.append(ellipsoid(f"Hand_{side}", hx, 413, 12, 17, 10, skin))
+    # --- Ступни ---
+    parts.append(ellipsoid("Foot_L", 220, 564, 23, 11, 20, white,
+                           y=-L(8), rot_z=-12))
+    parts.append(ellipsoid("Foot_R", 270, 564, 23, 11, 20, white,
+                           y=-L(8), rot_z=12))
 
-    # --- Ноги: толще у бедра, тоньше у щиколотки, между собой — небольшой зазор ---
-    for side, lx in (("L", 231.5), ("R", 258.5)):
-        body_parts.append(vert_cone(f"Leg_{side}", lx, 395, 558, 14, 9.5, skin,
-                                    ry_factor=0.9))
+    # --- Слияние + обводка ---
+    body = merge_into_one(parts, "Stickman_Body", white, outline)
 
-    # --- Ступни: плоские овалы, развёрнутые наружу, перекрывают низ ног ---
-    body_parts.append(ellipsoid("Foot_L", 219, 564, 23, 11, 20, skin,
-                                y=-L(8), rot_z=-12))
-    body_parts.append(ellipsoid("Foot_R", 271, 564, 23, 11, 20, skin,
-                                y=-L(8), rot_z=12))
-
-    # --- Слияние в одно тело ---
-    if MERGE_BODY:
-        body = merge_into_one(body_parts, "Stickman_Body", skin)
-        body_objs = [body]
-    else:
-        body_objs = body_parts
-
-    # --- Лицо (отдельные объекты, чуть утоплены в голову) ---
+    # --- Лицо: чёрные глаза и рот (отдельные объекты) ---
     face = []
     for side, ex in (("L", 231), ("R", 259)):
         ey = 187
         y = head_surface_y(HX, HY, HRX, HRZ, HRY, ex, ey)
-        face.append(ellipsoid(f"Eye_{side}", ex, ey, 4.5, 5.5, 3, dark, y=y + L(1.2)))
-
+        face.append(ellipsoid(f"Eye_{side}", ex, ey, 4.5, 5.5, 2.5, black, y=y))
     mx, my = 244, 207
     y = head_surface_y(HX, HY, HRX, HRZ, HRY, mx, my)
-    face.append(ellipsoid("Mouth", mx, my, 14, 1.8, 3, dark, y=y + L(1.2)))
+    face.append(ellipsoid("Mouth", mx, my, 14, 1.8, 2.5, black, y=y))
 
-    # --- Всё под одним Empty, чтобы двигать модель целиком ---
+    # --- Всё под одним Empty ---
     root = bpy.data.objects.new("Stickman", None)
     bpy.context.collection.objects.link(root)
-    for obj in body_objs + face:
+    for obj in [body] + face:
         obj.parent = root
 
     bpy.ops.object.select_all(action="DESELECT")

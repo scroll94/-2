@@ -21,7 +21,10 @@ CX = 245                   # ось симметрии (px)
 CLEAR_SCENE = False        # True -> очистить сцену перед созданием
 MERGE_BODY = True          # True -> слить тело в один цельный меш
 VOXEL_SIZE = 0.006         # детализация слияния, м (меньше = подробнее, но тяжелее)
-OUTLINE_THICKNESS = 0.008  # толщина чёрной обводки, м
+OUTLINE_MODE = "HULL"      # "HULL" — обводка геометрией (видна и во вьюпорте)
+                           # "FREESTYLE" — линия только по контуру, видна при рендере (F12)
+OUTLINE_THICKNESS = 0.006  # толщина обводки для HULL, м
+FREESTYLE_PX = 3.0         # толщина линии для FREESTYLE, px
 SMOOTH_AFTER_MERGE = True  # слегка сгладить стыки после слияния
 
 S = HEIGHT_M / (IMG_BOTTOM - IMG_TOP)   # метров на пиксель
@@ -99,6 +102,37 @@ def add_outline(obj, outline_mat):
     mod.material_offset = slot       # оболочке достаётся материал обводки
     mod.material_offset_rim = slot
     return mod
+
+
+def enable_viewport_culling():
+    """Во вьюпорте скрываем «передние» грани оболочки — остаётся только контур по краю."""
+    for screen in bpy.data.screens:
+        for area in screen.areas:
+            if area.type == "VIEW_3D":
+                for space in area.spaces:
+                    if space.type == "VIEW_3D":
+                        space.shading.show_backface_culling = True
+
+
+def setup_freestyle():
+    """2D-обводка: линия только по силуэту и границам (рендер F12)."""
+    scene = bpy.context.scene
+    scene.render.use_freestyle = True
+    scene.render.line_thickness_mode = "ABSOLUTE"
+    scene.render.line_thickness = FREESTYLE_PX
+    vl = bpy.context.view_layer
+    vl.use_freestyle = True
+    fs = vl.freestyle_settings
+    ls = fs.linesets.active or fs.linesets.new("Outline")
+    ls.select_silhouette = True
+    ls.select_border = True
+    ls.select_crease = False
+    ls.select_contour = False
+    ls.select_external_contour = False
+    ls.select_material_boundary = False
+    ls.select_edge_mark = False
+    ls.linestyle.color = (0.0, 0.0, 0.0)
+    ls.linestyle.thickness = FREESTYLE_PX
 
 
 # ---------------------------------------------------------------- ПРИМИТИВЫ
@@ -226,12 +260,16 @@ def build():
     # --- Слияние в одно тело + обводка ---
     if MERGE_BODY:
         body = merge_into_one(body_parts, "Stickman_Body", skin)
-        add_outline(body, outline_mat)
         body_objs = [body]
     else:
-        for p in body_parts:
-            add_outline(p, outline_mat)
         body_objs = body_parts
+
+    if OUTLINE_MODE == "HULL":
+        for o in body_objs:
+            add_outline(o, outline_mat)
+        enable_viewport_culling()
+    else:
+        setup_freestyle()
 
     # --- Лицо ---
     face = []

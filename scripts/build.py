@@ -21,6 +21,28 @@ MAX_PER_SOURCE = 15    # максимум новостей с одного ис�
 LOCAL_TZ = timezone(timedelta(hours=5))  # часовой пояс для отображения (UTC+5)
 
 ATOM = "{http://www.w3.org/2005/Atom}"
+MEDIA = "{http://search.yahoo.com/mrss/}"
+CONTENT = "{http://purl.org/rss/1.0/modules/content/}"
+IMG_RE = re.compile(r'<img[^>]+src=["\']([^"\']+)["\']', re.I)
+
+
+def find_image(it, *html_texts):
+    """Ищет картинку: media:content / media:thumbnail / enclosure / первый <img> в тексте."""
+    for tag in (f"{MEDIA}thumbnail", f"{MEDIA}content"):
+        for el in it.iter(tag):
+            url = el.get("url", "")
+            if url.startswith("http") and el.get("medium", "image") == "image":
+                return url
+    for el in it.findall("enclosure") + it.findall(f"{ATOM}link"):
+        if (el.get("type") or "").startswith("image/"):
+            url = el.get("url") or el.get("href") or ""
+            if url.startswith("http"):
+                return url
+    for text in html_texts:
+        m = IMG_RE.search(html.unescape(text or ""))
+        if m and m.group(1).startswith("http"):
+            return m.group(1)
+    return ""
 
 
 def load_feeds():
@@ -72,6 +94,7 @@ def fetch(name, url):
             "link": (it.findtext("link") or "").strip(),
             "date": parse_date(it.findtext("pubDate") or it.findtext("{http://purl.org/dc/elements/1.1/}date")),
             "summary": clean(it.findtext("description")),
+            "image": find_image(it, it.findtext(f"{CONTENT}encoded"), it.findtext("description")),
         })
     for it in root.iter(f"{ATOM}entry"):  # Atom
         link = ""
@@ -84,6 +107,7 @@ def fetch(name, url):
             "link": link,
             "date": parse_date(it.findtext(f"{ATOM}published") or it.findtext(f"{ATOM}updated")),
             "summary": clean(it.findtext(f"{ATOM}summary") or it.findtext(f"{ATOM}content")),
+            "image": find_image(it, it.findtext(f"{ATOM}content"), it.findtext(f"{ATOM}summary")),
         })
 
     items = [i for i in items if i["title"] and i["link"].startswith("http")]
@@ -97,11 +121,17 @@ def render(news, sources_ok, now):
     def card(n):
         d = n["date"].astimezone(LOCAL_TZ).strftime("%d.%m %H:%M") if n["date"] else ""
         summary = f'<p>{html.escape(n["summary"])}</p>' if n["summary"] else ""
+        hue = sum(map(ord, n["source"])) * 47 % 360
+        ph = f'<span class="ph" style="--h:{hue}">{html.escape(n["source"])}</span>'
+        img = (f'<img src="{html.escape(n["image"])}" alt="" loading="lazy" referrerpolicy="no-referrer" '
+               f'onerror="this.replaceWith(this.nextElementSibling.content.cloneNode(true))">'
+               f'<template>{ph}</template>') if n["image"] else ph
         return (
             f'<article data-src="{html.escape(n["source"])}">'
-            f'<div class="meta"><span class="src">{html.escape(n["source"])}</span><time>{d}</time></div>'
+            f'<a class="thumb" href="{html.escape(n["link"])}" target="_blank" rel="noopener" tabindex="-1">{img}</a>'
+            f'<div class="body"><div class="meta"><span class="src">{html.escape(n["source"])}</span><time>{d}</time></div>'
             f'<h2><a href="{html.escape(n["link"])}" target="_blank" rel="noopener">{html.escape(n["title"])}</a></h2>'
-            f"{summary}</article>"
+            f"{summary}</div></article>"
         )
 
     chips = "".join(

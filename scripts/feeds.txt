@@ -1,0 +1,12 @@
+# Источник | URL RSS/Atom-ленты. Строки с # игнорируются.
+TechCrunch | https://techcrunch.com/category/artificial-intelligence/feed/
+The Verge | https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
+VentureBeat | https://venturebeat.com/category/ai/feed/
+MIT Technology Review | https://www.technologyreview.com/topic/artificial-intelligence/feed
+Ars Technica | https://arstechnica.com/ai/feed/
+Wired | https://www.wired.com/feed/tag/ai/latest/rss
+OpenAI | https://openai.com/news/rss.xml
+Google AI | https://blog.google/technology/ai/rss/
+Hugging Face | https://huggingface.co/blog/feed.xml
+Hacker News | https://hnrss.org/newest?q=AI+OR+LLM+OR+GPT+OR+Claude&points=100
+Хабр | https://habr.com/ru/rss/hubs/artificial_intelligence/articles/

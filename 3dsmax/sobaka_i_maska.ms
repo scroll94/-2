@@ -344,7 +344,7 @@
         addModifier m (TurboSmooth iterations:(if patched then 1 else 2))
 
         m.material = StandardMaterial name:"Maska_Mat" diffuse:(color 205 200 140) ambient:(color 120 115 70) specularLevel:60 glossiness:35
-        m.pos = [85, 0, 11]   -- маска стоит справа от таксы
+        m.pos = [85, 0, 11]   -- маска стоит справа от собаки
 
         redrawViews()
         format "Маска готова: % вершин сетки\n" verts.count
